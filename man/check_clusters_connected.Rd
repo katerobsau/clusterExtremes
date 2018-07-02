@@ -20,9 +20,9 @@ class_id takes boolean values of 0 and 1}
 Returns the a data frame with columns block, which is the year, and p_value.
 }
 \description{
-Under the classification, regions need not be connected. 
+Under the classification, regions can be disconnected. 
 For fitting max-stable models, we do not want to group stations in 
-disjoint regions. This returns as boolean if the station is density 
+disjoint regions. This function returns as boolean if the station is density 
 connected to it's medoid
 }
 \details{

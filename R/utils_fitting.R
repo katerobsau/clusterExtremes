@@ -22,16 +22,22 @@ utils_get_pair_weights <- function(data, min_common_obs = 10){
 # From this model, calculate the ratio of axes for the elliptical level curve
 # THe default for the level curve is 0.99
 utils_check_cov_ratio <- function(maxstable_model, level = 0.99){
-    param = maxstable_model$fitted.values
-    cov11 = param[1]
-    cov12 = param[2]
-    cov22 = param[3]
-    cov_mat = matrix(c(cov11, cov12, cov12, cov22),
+
+  if(any(is.na(maxstable_model))){
+    return(NA)
+  }
+
+  param = maxstable_model$fitted.values
+  cov11 = param[1]
+  cov12 = param[2]
+  cov22 = param[3]
+  cov_mat = matrix(c(cov11, cov12, cov12, cov22),
                      nrow = 2, byrow = TRUE)
-    eigen_vals = eigen(cov_mat)$values
-    r_values = 2*sqrt(eigen_vals*qchisq(level, 2))
-    radius_ratio = r_values[2]/r_values[1]
-    return(radius_ratio)
+  eigen_vals = eigen(cov_mat)$values
+  r_values = 2*sqrt(eigen_vals*qchisq(level, 2))
+  radius_ratio = r_values[2]/r_values[1]
+
+  return(radius_ratio)
 }
 
 # This function takes a fitted maxstable model from the spatial extremes
@@ -41,7 +47,7 @@ utils_check_cov_ratio <- function(maxstable_model, level = 0.99){
 # Default level curve is 0.99
 utils_get_ellipse <- function(maxstable_model, level = 0.99){
 
-  if(any(is.na(mastable_model))){
+  if(any(is.na(maxstable_model))){
 
     segments = 51
     ellipse = matrix(NA, 51, 2)
@@ -50,9 +56,9 @@ utils_get_ellipse <- function(maxstable_model, level = 0.99){
 
   }
 
-  cov11 = fit_list[[i]]$fitted.values[1]
-  cov12 = fit_list[[i]]$fitted.values[2]
-  cov22 = fit_list[[i]]$fitted.values[3]
+  cov11 = maxstable_model$fitted.values[1]
+  cov12 = maxstable_model$fitted.values[2]
+  cov22 = maxstable_model$fitted.values[3]
   cov_mat = matrix(c(cov11, cov12, cov12, cov22),
                  nrow = 2, byrow = TRUE)
 
@@ -69,7 +75,35 @@ utils_get_ellipse <- function(maxstable_model, level = 0.99){
 
   return(ellipse)
 }
-#
+
+utils_temp_fun <- function(l, i){
+  if(any(is.na(l))) return(NA)
+     l$param[i]
+}
+
+utils_flag_ellipses <- function(maxstable_model_list, alpha = 0.05){
+
+  # get parameters from list
+  cov11 = lapply(maxstable_model_list, utils_temp_fun, i = 1) %>% unlist()
+  cov12 = lapply(maxstable_model_list, utils_temp_fun, i = 2) %>% unlist()
+  cov22 = lapply(maxstable_model_list, utils_temp_fun, i = 3) %>% unlist()
+  param_info <- data.frame(sim_index = 1:length(model_list),
+                           cov11, cov12, cov22)
+
+  # check ellipses
+  check_ellipses <- param_info %>%
+    mutate(sim_index = 1:length(maxstable_model_list)) %>%
+    filter(cov11 < quantile(param_info$cov11, alpha/2) |
+             cov11 > quantile(param_info$cov11, 1 - alpha/2) |
+             cov22 < quantile(param_info$cov22, alpha/2) |
+             cov22 > quantile(param_info$cov22, 1- alpha/2) |
+             cov12 < quantile(param_info$cov12, alpha/2) |
+             cov12 > quantile(param_info$cov12, 1- alpha/2))
+
+  return(check_ellipses)
+
+}
+
 # utils_wrapper_fit <- function(filter_id,
 #                               all_cluster_info,
 #                               fmado_data,
