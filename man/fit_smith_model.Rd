@@ -73,36 +73,3 @@ If the ratio is too small, we initial the start values and repeat the fitting.
 We also repeat the fitting if the fitted parameter is 'too far'
 from what we consider 'normal'.
 }
-\examples{
-# read in cluster data
-load("Data/max_data.RData")
-load("Data/test_Data.RData")
-load("Data/medoid_indexes.RData")
-
-# covert data from GEV to Frechet for fitting
-frech_data = apply(data, 2, gev2frech_with_tryCatch)
-
-# get the grid
-grid = get_classification_grid(coord = fit_info \%>\% select(x,y),
-                              grid_space = grid_space, min_dist = min_dist_to_stn)
-names(grid) = c("x", "y")
-
- # classify the grid points
-stn_train = knn_info \%>\% select(x, y)
-stn_test = grid \%>\% select(x, y)
-stn_label = knn_info$cluster_id
-knn_stations = knn(train = stn_train, test = stn_test,
-                  cl = stn_label, k = k_nbrs,
-                  prob = TRUE)
-grid <- grid \%>\%
- mutate(knn_id = knn_stations, prob = attr(knn_stations, "prob"))
-
-model_list <- fit_smith_model(data = data, knn_info = knn_info,
-                   medoid_indexes = medoid_indexes, use_id = 1,
-                   grid = grid, min_class_prob = 0.5,
-                   num_samps = 10, samp_size = 30,
-                   min_common_obs = 10, min_pairs = choose(10,2),
-                   ratio_threshold = 0.1, ellipse_alpha = 0.1,
-                   max_iter = 3)
-
-}

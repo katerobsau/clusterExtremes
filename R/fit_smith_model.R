@@ -48,6 +48,7 @@
 #'
 #' @examples
 #' # read in cluster data
+#' print("HACKED EXAMPLE FOR LOADING DATA!! NAUGHTY)
 #' load("Data/max_data.RData")
 #' load("Data/test_Data.RData")
 #' load("Data/medoid_indexes.RData")
@@ -56,7 +57,7 @@
 #' frech_data = apply(data, 2, gev2frech_with_tryCatch)
 #'
 #' # get the grid
-#' grid = get_classification_grid(coord = fit_info %>% select(x,y),
+#' grid = get_grid_for_classification(coord = fit_info %>% select(x,y),
 #'                               grid_space = grid_space, min_dist = min_dist_to_stn)
 #' names(grid) = c("x", "y")
 #'
