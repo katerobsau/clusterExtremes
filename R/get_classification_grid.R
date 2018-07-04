@@ -1,3 +1,4 @@
+
 get_classification_grid <- function(coords, grid_space, min_dist){
 
   if(missing(grid_space)) grid_space = 1

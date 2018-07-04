@@ -87,12 +87,11 @@ utils_flag_ellipses <- function(maxstable_model_list, alpha = 0.05){
   cov11 = lapply(maxstable_model_list, utils_get_par_fun, i = 1) %>% unlist()
   cov12 = lapply(maxstable_model_list, utils_get_par_fun, i = 2) %>% unlist()
   cov22 = lapply(maxstable_model_list, utils_get_par_fun, i = 3) %>% unlist()
-  param_info <- data.frame(sim_index = 1:length(model_list),
+  param_info <- data.frame(sim_index = 1:length(maxstable_model_list),
                            cov11, cov12, cov22)
 
   # check ellipses
   check_ellipses <- param_info %>%
-    mutate(sim_index = 1:length(maxstable_model_list)) %>%
     filter(cov11 < quantile(param_info$cov11, alpha/2, na.rm  = T) |
              cov11 > quantile(param_info$cov11, 1 - alpha/2, na.rm  = T) |
              cov22 < quantile(param_info$cov22, alpha/2, na.rm  = T) |
