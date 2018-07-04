@@ -17,6 +17,7 @@ Imports:
 	extRemes,
 	ggplot2,
 	magrittr,
+	oz,
 	psych,
 	RaingleExtremes,
 	SpatialExtremes

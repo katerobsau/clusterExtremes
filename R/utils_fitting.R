@@ -76,7 +76,7 @@ utils_get_ellipse <- function(maxstable_model, level = 0.99){
   return(ellipse)
 }
 
-utils_temp_fun <- function(l, i){
+utils_get_par_fun <- function(l, i){
   if(any(is.na(l))) return(NA)
      l$param[i]
 }
@@ -84,21 +84,21 @@ utils_temp_fun <- function(l, i){
 utils_flag_ellipses <- function(maxstable_model_list, alpha = 0.05){
 
   # get parameters from list
-  cov11 = lapply(maxstable_model_list, utils_temp_fun, i = 1) %>% unlist()
-  cov12 = lapply(maxstable_model_list, utils_temp_fun, i = 2) %>% unlist()
-  cov22 = lapply(maxstable_model_list, utils_temp_fun, i = 3) %>% unlist()
+  cov11 = lapply(maxstable_model_list, utils_get_par_fun, i = 1) %>% unlist()
+  cov12 = lapply(maxstable_model_list, utils_get_par_fun, i = 2) %>% unlist()
+  cov22 = lapply(maxstable_model_list, utils_get_par_fun, i = 3) %>% unlist()
   param_info <- data.frame(sim_index = 1:length(model_list),
                            cov11, cov12, cov22)
 
   # check ellipses
   check_ellipses <- param_info %>%
     mutate(sim_index = 1:length(maxstable_model_list)) %>%
-    filter(cov11 < quantile(param_info$cov11, alpha/2) |
-             cov11 > quantile(param_info$cov11, 1 - alpha/2) |
-             cov22 < quantile(param_info$cov22, alpha/2) |
-             cov22 > quantile(param_info$cov22, 1- alpha/2) |
-             cov12 < quantile(param_info$cov12, alpha/2) |
-             cov12 > quantile(param_info$cov12, 1- alpha/2))
+    filter(cov11 < quantile(param_info$cov11, alpha/2, na.rm  = T) |
+             cov11 > quantile(param_info$cov11, 1 - alpha/2, na.rm  = T) |
+             cov22 < quantile(param_info$cov22, alpha/2, na.rm  = T) |
+             cov22 > quantile(param_info$cov22, 1- alpha/2, na.rm  = T) |
+             cov12 < quantile(param_info$cov12, alpha/2, na.rm  = T) |
+             cov12 > quantile(param_info$cov12, 1- alpha/2, na.rm  = T))
 
   return(check_ellipses)
 

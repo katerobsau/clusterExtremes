@@ -1,7 +1,11 @@
 get_classification_grid <- function(coords, grid_space, min_dist){
 
   if(missing(grid_space)) grid_space = 1
-  if(misisng(min_dist)) min_dist = 1.5*grid_space
+  if(missing(min_dist)) min_dist = 1.5*grid_space
+
+  # Get Australian outline
+  mainland_df <- utils_mainland()
+  tas_df <- utils_tasmania()
 
   # Create grid for classification
   long = range(coords$x)
