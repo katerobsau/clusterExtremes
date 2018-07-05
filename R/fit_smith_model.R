@@ -47,37 +47,61 @@
 #' @export
 #'
 #' @examples
-#' # read in cluster data
-#' print("HACKED EXAMPLE FOR LOADING DATA!! NAUGHTY)
-#' load("Data/max_data.RData")
-#' load("Data/test_Data.RData")
-#' load("Data/medoid_indexes.RData")
+#' # generate an arbitary set of points
+#' set.seed(1)
+#' n.site <- 600
+#' locations <- matrix(runif(2*n.site, 0, 10), ncol = 2)
+#' colnames(locations) <- c("lon", "lat")
 #'
-#'# covert data from GEV to Frechet for fitting
-#' frech_data = apply(data, 2, gev2frech_with_tryCatch)
+#' # create a medoid
+#' medoid_coords = c(3,3)
+#' location = c(locations, rbind(medoid_coords))
+#' medoid = 601
 #'
-#' # get the grid
-#' grid = get_grid_for_classification(coord = fit_info %>% select(x,y),
-#'                               grid_space = grid_space, min_dist = min_dist_to_stn)
+#' # create a test clustering and classificaiton dataframe
+#' # make two disjoint regions
+#' # make some of the probabilities less than 0.5
+#' knn_info <- data.frame(x = locations[,1], y = locations[,2]) %>%
+#'  mutate(knn_id = 1) %>%
+#'  mutate(cluster_id = 1) %>%
+#'  mutate(prob = 1) %>%
+#'  mutate(knn_id = if_else((x < 6 & y < 6) | (x > 7 & y > 7), 2, knn_id)) %>%
+#'  mutate(cluster_id = if_else((x < 6 & y < 6) | (x > 7 & y > 7), 2, cluster_id)) %>%
+#'  mutate(prob = if_else(x < 5.5 & y < 5.5, prob, 0.4))
+#'
+#' # generate some data
+#' data <- rmaxstab(100, locations, cov.mod = "gauss", cov11 = 1, cov12 = 0, cov22 = 1)
+#'
+#' # create grid covering the coordiantes
+#' grid <- get_grid_for_classification(coords = knn_info %>% select(x,y),
+#'                                    grid_space = 0.25, restrict_aus = FALSE)
 #' names(grid) = c("x", "y")
 #'
-#'  # classify the grid points
-#' stn_train = knn_info %>% select(x, y)
-#' stn_test = grid %>% select(x, y)
-#' stn_label = knn_info$cluster_id
-#' knn_stations = knn(train = stn_train, test = stn_test,
-#'                   cl = stn_label, k = k_nbrs,
-#'                   prob = TRUE)
+#' # mimic the classificaiton of the knn_info
 #' grid <- grid %>%
-#'  mutate(knn_id = knn_stations, prob = attr(knn_stations, "prob"))
+#'  mutate(knn_id = 1) %>%
+#'  mutate(knn_id = if_else((x < 6 & y < 6) | (x > 7 & y > 7), 2, knn_id))
 #'
+#' # fit the smith model
 #' model_list <- fit_smith_model(data = data, knn_info = knn_info,
-#'                    medoid_indexes = medoid_indexes, use_id = 1,
-#'                    grid = grid, min_class_prob = 0.5,
-#'                    num_samps = 10, samp_size = 30,
-#'                    min_common_obs = 10, min_pairs = choose(10,2),
-#'                    ratio_threshold = 0.1, ellipse_alpha = 0.1,
-#'                    max_iter = 3)
+#'                              medoid_indexes = c(100, 601), use_id = 2,
+#'                              grid, min_class_prob = 0.5,
+#'                              num_samps = 10, samp_size = 20,
+#'                              min_common_obs = 0, min_pairs = 0,
+#'                              ratio_threshold = 0.1, ellipse_alpha= 0.05,
+#'                              max_iter = 3,
+#'                              save_output = FALSE, output_dir = NULL,
+#'                              reference_id = NULL)
+#'
+#' # visualise the result
+#' medoid_coords = data.frame(x=3, y=3)
+#' ellipse_df <- get_ellipse_from_smith_model_list(model_list, medoid = medoid_coords)
+#'
+#' # plot result
+#' ell_plot <- ggplot(data = ellipse_df) +
+#'  geom_path(aes(x=x, y =y, group = sim_index), alpha = 0.25) +
+#'  theme_bw()
+#' ell_plot
 #'
 fit_smith_model <- function(data, knn_info, medoid_indexes, use_id,
                             grid, min_class_prob,
@@ -90,18 +114,18 @@ fit_smith_model <- function(data, knn_info, medoid_indexes, use_id,
 
   id_check = all(knn_info$cluster_id %in% knn_info$knn_id) &
     all(knn_info$knn_id %in% knn_info$cluster_id)
-  if(id_check) stop("Error: cluster_id and knn_id does not match")
+  if(id_check == FALSE) stop("Error: cluster_id and knn_id does not match")
 
   id1_check = all(knn_info$knn_id %in% grid$knn_id) &
     all(grid$knn_id %in% knn_info$knn_id)
-  if(id1_check) stop("Error: grid_id and knn_id does not match")
+  if(id1_check == FALSE) stop("Error: grid_id and knn_id does not match")
 
   range_check = all(max(grid$x) >= knn_info$x) &
     all(min(grid$x) <= knn_info$x) &
     all(max(grid$y) >= knn_info$y) &
     all(min(grid$y) <= knn_info$y)
 
-  if(range_check) warning("Warning: grid does not cover range of station data")
+  if(range_check == FALSE) warning("Warning: grid does not cover range of station data")
 
   if(is.integer(num_samps)) stop("Error: num_samps must be an integer")
   if(is.integer(samp_size)) stop("Error:samp_size must be an integer")
@@ -112,6 +136,9 @@ fit_smith_model <- function(data, knn_info, medoid_indexes, use_id,
 
   if(ellipse_alpha > 0.5 | ellipse_alpha < 0)
     stop("Error: incorrect valeu for ellipse_alpha specified")
+
+  if(ncol(data) != nrow(knn_info))
+    stop("Error: There data and knn_info have incompatible dimensions")
 
   # create a new class_id that is binary
   fit_info <- knn_info %>%
