@@ -14,9 +14,10 @@
 #' @export
 #'
 #' @examples
+#' set.seed(1)
 #' n.site <- 30
 #' coords <-data.frame(x = runif(n.site, 0, 10), y = runif(n.site, 0, 10))
-#' grid_output = get_classification_grid(coords = coords, restrict_aus = FALSE)
+#' grid_output = get_grid_for_classification(coords = coords, restrict_aus = FALSE)
 #' plot(grid_output)
 #' points(coords, col = "red", pch = 20)
 #'
@@ -31,8 +32,8 @@ get_grid_for_classification <- function(coords, grid_space = 1,
                                     restrict_aus = TRUE){
 
   # Create grid for classification
-  long = range(coords$x)
-  lat  = range(coords$y)
+  long = range(coords$x) + c(-grid_space, grid_space)
+  lat  = range(coords$y) + c(-grid_space, grid_space)
   long.seq = seq(min(long), max(long), by = grid_space)
   lat.seq = seq(min(lat), max(lat), by = grid_space)
   full_grid = expand.grid(longitude = long.seq, latitude = lat.seq)

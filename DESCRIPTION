@@ -20,4 +20,5 @@ Imports:
 	oz,
 	psych,
 	RaingleExtremes,
+	SDMTools,
 	SpatialExtremes

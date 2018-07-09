@@ -27,9 +27,10 @@ Function generates a grid to cover a set of given coordiantes
 (additional funcitonality to restrict the grid to inland areas of Australia)
 }
 \examples{
+set.seed(1)
 n.site <- 30
 coords <-data.frame(x = runif(n.site, 0, 10), y = runif(n.site, 0, 10))
-grid_output = get_classification_grid(coords = coords, restrict_aus = FALSE)
+grid_output = get_grid_for_classification(coords = coords, restrict_aus = FALSE)
 plot(grid_output)
 points(coords, col = "red", pch = 20)
 

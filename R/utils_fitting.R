@@ -1,21 +1,21 @@
-# Function gets pair weights for max-stable model
-# If there are insuffienct common observations, weight is set to zero
-utils_get_pair_weights <- function(data, min_common_obs = 10){
-
-  num_stns = ncol(data)
-
-  common_count <- get_num_common_obs(data)
-
-  pairs = expand.grid(j = 1:num_stns, i = 1:num_stns) %>%
-    as.data.frame() %>%
-    filter(i < j) %>%
-    mutate(pair_weights = ifelse(i == 1 | j == 1, 0, 1)) %>%
-    mutate(common = common_count) %>%
-    mutate(pair_weights = ifelse(common < min_common_obs, 0, pair_weights))
-
-  return(pairs$pair_weights)
-
-}
+# # Function gets pair weights for max-stable model
+# # If there are insuffienct common observations, weight is set to zero
+# utils_get_pair_weights <- function(data, min_common_obs = 10){
+#
+#   num_stns = ncol(data)
+#
+#   common_count <- get_num_common_obs(data)
+#
+#   pairs = expand.grid(j = 1:num_stns, i = 1:num_stns) %>%
+#     as.data.frame() %>%
+#     filter(i < j) %>%
+#     mutate(pair_weights = ifelse(i == 1 | j == 1, 0, 1)) %>%
+#     mutate(common = common_count) %>%
+#     mutate(pair_weights = ifelse(common < min_common_obs, 0, pair_weights))
+#
+#   return(pairs$pair_weights)
+#
+# }
 
 # This function takes a fitted maxstable model from the spatial extremes
 # package with a Gaussian dependence structure
@@ -76,11 +76,13 @@ utils_get_ellipse <- function(maxstable_model, level = 0.99){
   return(ellipse)
 }
 
+# This function gets the index i paramter from the max-stable model
 utils_get_par_fun <- function(l, i){
   if(any(is.na(l))) return(NA)
      l$param[i]
 }
 
+# This function helps identify any suspect ellipses
 utils_flag_ellipses <- function(maxstable_model_list, alpha = 0.05){
 
   # get parameters from list

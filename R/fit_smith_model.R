@@ -27,6 +27,12 @@
 #' Must cover the region of interest
 #' @param min_class_prob for the station to be considered in the fitting it must
 #' have been assigned under the classification with this minimum probability
+#' @param high_class_prob for the station to be considered in the fitting it must
+#' not be different to the rest of the stations in the region, if the probability of
+#' classificaiton is high, but the cluster id and classification id are different
+#' we discard the station
+#' @param frech_bool (default = TRUE) is the data frechet distributed, otherwise we
+#' assume loc, scale and shape parameters constant
 #' @param num_samps number of times to repeat the fitting of the smith model
 #' @param samp_size number of stations used in fitting
 #' @param min_common_obs minimum number of common observation for get_pair_weights()
@@ -86,6 +92,7 @@
 #' model_list <- fit_smith_model(data = data, knn_info = knn_info,
 #'                              medoid_indexes = c(100, 601), use_id = 2,
 #'                              grid, min_class_prob = 0.5,
+#'                              frech_bool = TRUE,
 #'                              num_samps = 10, samp_size = 20,
 #'                              min_common_obs = 0, min_pairs = 0,
 #'                              ratio_threshold = 0.1, ellipse_alpha= 0.05,
@@ -104,7 +111,8 @@
 #' ell_plot
 #'
 fit_smith_model <- function(data, knn_info, medoid_indexes, use_id,
-                            grid, min_class_prob,
+                            grid, min_class_prob, high_class_prob,
+                            frech_bool = TRUE,
                             num_samps, samp_size,
                             min_common_obs, min_pairs = choose(10,2),
                             ratio_threshold = 0.1, ellipse_alpha,
@@ -144,7 +152,7 @@ fit_smith_model <- function(data, knn_info, medoid_indexes, use_id,
   fit_info <- knn_info %>%
     mutate(class_id = (knn_id == use_id))
   grid <- grid %>%
-    mutate(class_id = knn_id == use_id)
+    mutate(class_id = (knn_id == use_id))
 
   # check the region is connected
   connection_check = check_clusters_connected(
@@ -160,11 +168,11 @@ fit_smith_model <- function(data, knn_info, medoid_indexes, use_id,
   # get possible stations for fitting
   possible_stns = which(connection_check == TRUE &
                           fit_info$prob > min_class_prob &
-                          fit_info$cluster_id == use_id) %>%
+                          !((fit_info$cluster_id != fit_info$knn_id) & fit_info$prob > high_class_prob)) %>%
     as.numeric()
 
   if(length(possible_stns) < samp_size + 1){
-    stop("Error: too few stations for sampling, reduce samp_size")
+    warning("Warning: too few stations for sampling, reduce samp_size")
   }
 
   # -----------------------------------------------------------------------------
@@ -191,14 +199,16 @@ fit_smith_model <- function(data, knn_info, medoid_indexes, use_id,
     }
 
     fitM <- tryCatch({
-      # fitmaxstab(data = data_fit,
-      #            coord = coord_fit,
-      #            marg.cov = NULL,
-      #            cov.mod = "gauss",
-      #            iso = FALSE,
-      #            weights = pair_weights,
-      #            fit.marge = FALSE);
-      fitmaxstab(data = data_fit,
+      if(frech_bool == TRUE){
+        fitM = fitmaxstab(data = data_fit,
+                 coord = coord_fit,
+                 marg.cov = NULL,
+                 cov.mod = "gauss",
+                 iso = FALSE,
+                 weights = pair_weights,
+                 fit.marge = FALSE)
+        }else{
+        fitM = fitmaxstab(data = data_fit,
                  coord = coord_fit,
                  loc.form <- loc ~ 1,
                  scale.form <- scale ~ 1,
@@ -206,12 +216,14 @@ fit_smith_model <- function(data, knn_info, medoid_indexes, use_id,
                  marg.cov = NULL,
                  cov.mod = "gauss",
                  iso = FALSE,
-                 weights = pair_weights);
+                 weights = pair_weights)
+        }
+      fitM;
     }, warning = function(w){
-      # cat("WARNING :",conditionMessage(e), "\n");
+      cat("WARNING :",conditionMessage(w), "\n");
       return(NA)
     }, error = function(e){
-      # cat("ERROR :",conditionMessage(e), "\n");
+      cat("ERROR :",conditionMessage(e), "\n");
       return(NA)
     })
 
@@ -238,21 +250,7 @@ fit_smith_model <- function(data, knn_info, medoid_indexes, use_id,
   # -----------------------------------------------------------------------------
 
   # get start values
-  cov11 = lapply(model_list, utils_get_par_fun, i = 1) %>% unlist()
-  cov12 = lapply(model_list, utils_get_par_fun, i = 2) %>% unlist()
-  cov22 = lapply(model_list, utils_get_par_fun, i = 3) %>% unlist()
-  locCoeff1 = lapply(model_list, utils_get_par_fun, i = 4) %>% unlist()
-  scaleCoeff1 = lapply(model_list, utils_get_par_fun, i = 5) %>% unlist()
-  shapeCoeff1 = lapply(model_list, utils_get_par_fun, i = 6) %>% unlist()
-  start_cov11 = median(cov11, na.rm = TRUE)
-  start_cov12 = median(cov12, na.rm = TRUE)
-  start_cov22 = median(cov22, na.rm = TRUE)
-  start_loc = median(locCoeff1, na.rm = TRUE)
-  start_scale = median(scaleCoeff1, na.rm = TRUE)
-  start_shape = median(shapeCoeff1, na.rm = TRUE)
-
-  start_list = list(cov11 = start_cov11, cov12 = start_cov12, cov22 = start_cov22,
-                    locCoeff1 = start_loc, scaleCoeff1 = start_scale, shapeCoeff1 = start_shape)
+  start_list = get_start_list(model_list, frech_bool)
 
   # -----------------------------------------------------------------------------
 
@@ -285,23 +283,26 @@ fit_smith_model <- function(data, knn_info, medoid_indexes, use_id,
       pair_weights = get_pair_weights(data_fit, min_common_obs)
 
       fitM <- tryCatch({
-        # fitmaxstab(data = data_fit,
-        #            coord = coord_fit,
-        #            marg.cov = NULL,
-        #            cov.mod = "gauss",
-        #            iso = FALSE,
-        #            weights = pair_weights,
-        #            fit.marge = FALSE);
-        fitmaxstab(data = data_fit,
-                   coord = coord_fit,
-                   loc.form <- loc ~ 1,
-                   scale.form <- scale ~ 1,
-                   shape.form <- shape ~ 1,
-                   marg.cov = NULL,
-                   cov.mod = "gauss",
-                   iso = FALSE,
-                   weights = pair_weights,
-                   start = start_list);
+        if(frech_bool == TRUE){
+          fitM = fitmaxstab(data = data_fit,
+                            coord = coord_fit,
+                            marg.cov = NULL,
+                            cov.mod = "gauss",
+                            iso = FALSE,
+                            weights = pair_weights,
+                            fit.marge = FALSE)
+        }else{
+          fitM = fitmaxstab(data = data_fit,
+                            coord = coord_fit,
+                            loc.form <- loc ~ 1,
+                            scale.form <- scale ~ 1,
+                            shape.form <- shape ~ 1,
+                            marg.cov = NULL,
+                            cov.mod = "gauss",
+                            iso = FALSE,
+                            weights = pair_weights)
+        }
+        fitM;
       }, warning = function(w){
         # cat("WARNING :",conditionMessage(e), "\n");
         return(NA)
@@ -335,22 +336,7 @@ fit_smith_model <- function(data, knn_info, medoid_indexes, use_id,
     # -----------------------------------------------------------------------------
 
     # get start values
-    cov11 = lapply(model_list, utils_get_par_fun, i = 1) %>% unlist()
-    cov12 = lapply(model_list, utils_get_par_fun, i = 2) %>% unlist()
-    cov22 = lapply(model_list, utils_get_par_fun, i = 3) %>% unlist()
-    locCoeff1 = lapply(model_list, utils_get_par_fun, i = 4) %>% unlist()
-    scaleCoeff1 = lapply(model_list, utils_get_par_fun, i = 5) %>% unlist()
-    shapeCoeff1 = lapply(model_list, utils_get_par_fun, i = 6) %>% unlist()
-    start_cov11 = median(cov11, na.rm = TRUE)
-    start_cov12 = median(cov12, na.rm = TRUE)
-    start_cov22 = median(cov22, na.rm = TRUE)
-    start_loc = median(locCoeff1, na.rm = TRUE)
-    start_scale = median(scaleCoeff1, na.rm = TRUE)
-    start_shape = median(shapeCoeff1, na.rm = TRUE)
-
-    start_list = list(cov11 = start_cov11, cov12 = start_cov12, cov22 = start_cov22,
-                      locCoeff1 = start_loc, scaleCoeff1 = start_scale, shapeCoeff1 = start_shape)
-
+    start_list = get_start_list(model_list, frech_bool)
 
     convergence_issue = lapply(model_list, function(l){all(is.na(l))}) %>% unlist() %>% sum()
     print(paste(convergence_issue, "samples with suspect convergence"))
