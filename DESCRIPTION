@@ -13,11 +13,13 @@ RoxygenNote: 6.0.1
 Imports: 
   class,
   dbscan,
+  doParallel,
 	dplyr,
 	extRemes,
 	ggplot2,
 	magrittr,
 	oz,
+	parallel,
 	psych,
 	RaingleExtremes,
 	SDMTools,

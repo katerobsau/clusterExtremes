@@ -120,7 +120,7 @@ grid <- grid \%>\%
 # fit the smith model
 model_list <- fit_smith_model(data = data, knn_info = knn_info,
                              medoid_indexes = c(100, 601), use_id = 2,
-                             grid, min_class_prob = 0.5,
+                             grid, min_class_prob = 0.5, high_class_prob = 0.75,
                              frech_bool = TRUE,
                              num_samps = 10, samp_size = 20,
                              min_common_obs = 0, min_pairs = 0,

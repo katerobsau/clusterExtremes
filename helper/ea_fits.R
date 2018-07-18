@@ -1,3 +1,7 @@
+library(extRemes)
+library(SpatialExtremes)
+library(dbscan)
+
 knn_info <- knn_info %>%
   mutate(x = longitude) %>%
   mutate(y = latitude) %>%
@@ -18,12 +22,13 @@ len = length(medoid_indexes)
 all_models <- vector("list", len)
 all_ellipses = NULL
 for(i in 1:len){
-
+  print(i)
   use_id = i
+  samp_size = 50 #max(sum(knn_info$knn == use_id)*2/3, 10)
   model_list <- tryCatch({fit_smith_model(data = data, knn_info = knn_info,
                              medoid_indexes = medoid_indexes, use_id = i,
                              grid, min_class_prob = 0.5, high_class_prob = 0.75,
-                             num_samps = 20, samp_size = 40,
+                             num_samps = 5, samp_size = samp_size,
                              min_common_obs = 10, min_pairs = choose(10,2),
                              ratio_threshold = 0.1, ellipse_alpha = 0.1,
                              max_iter = 3,
@@ -43,12 +48,12 @@ for(i in 1:len){
 }
 
 all_ellipses <- all_ellipses %>%
-  mutate(plot_index = paste(region_id, sim_index))
+  mutate(plot_index = paste(region_id, sim_index)) %>%
+  filter(!is.na(x))
 
 # plot result
-ell_plot <- knn_wa_plot +
+ell_plot <- ggplot() + #knn_wa_plot +
   geom_path(data = all_ellipses, aes(x=x, y =y, group = plot_index), alpha = 0.25) +
   theme_bw()
-  ell_plot
 
 ell_plot

@@ -91,7 +91,7 @@
 #' # fit the smith model
 #' model_list <- fit_smith_model(data = data, knn_info = knn_info,
 #'                              medoid_indexes = c(100, 601), use_id = 2,
-#'                              grid, min_class_prob = 0.5,
+#'                              grid, min_class_prob = 0.5, high_class_prob = 0.75,
 #'                              frech_bool = TRUE,
 #'                              num_samps = 10, samp_size = 20,
 #'                              min_common_obs = 0, min_pairs = 0,
@@ -143,7 +143,7 @@ fit_smith_model <- function(data, knn_info, medoid_indexes, use_id,
     stop("Error: incorrect value for min_class_prob specified")
 
   if(ellipse_alpha > 0.5 | ellipse_alpha < 0)
-    stop("Error: incorrect valeu for ellipse_alpha specified")
+    stop("Error: incorrect value for ellipse_alpha specified")
 
   if(ncol(data) != nrow(knn_info))
     stop("Error: There data and knn_info have incompatible dimensions")
@@ -173,19 +173,23 @@ fit_smith_model <- function(data, knn_info, medoid_indexes, use_id,
 
   if(length(possible_stns) < samp_size + 1){
     warning("Warning: too few stations for sampling, reduce samp_size")
+    samp_size = length(possible_stns) - 1
   }
 
   # -----------------------------------------------------------------------------
 
   print("PARALLELISE ME")
+  # cl <- parallel::makeCluster(detectCores())
+  # doParallel::registerDoParallel(cl)
+  # model_list <-
+  #   foreach(i = 1:num_samps, .packages = c('SpatialExtremes', 'clusterExtremes',
+  #                                          'dplyr')) %dopar% {
   model_list = vector("list", num_samps)
   for(i in 1:num_samps){
 
-    set.seed(i)
+    set.seed(1)
     sample_stns = sample(possible_stns, samp_size, replace = FALSE)
 
-    # data_fit = frech_data[ , sample_stns] %>%
-    #   as.matrix()
     data_fit = data[ , sample_stns] %>%
       as.matrix()
 
@@ -228,9 +232,10 @@ fit_smith_model <- function(data, knn_info, medoid_indexes, use_id,
     })
 
     model_list[[i]] = fitM
+    # fitM
 
   }
-
+  # parallel::stopCluster(cl)
   # -----------------------------------------------------------------------------
 
   # caluclate ratio of elliptical curves

@@ -2,7 +2,6 @@
 
 export(check_clusters_connected)
 export(fit_smith_model)
-export(fit_smith_model1)
 export(get_ellipse_from_smith_model_list)
 export(get_grid_for_classification)
 export(get_pair_weights)
