@@ -187,7 +187,7 @@ fit_smith_model <- function(data, knn_info, medoid_indexes, use_id,
   model_list = vector("list", num_samps)
   for(i in 1:num_samps){
 
-    set.seed(1)
+    set.seed(i)
     sample_stns = sample(possible_stns, samp_size, replace = FALSE)
 
     data_fit = data[ , sample_stns] %>%
