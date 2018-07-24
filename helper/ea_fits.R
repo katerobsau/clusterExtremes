@@ -1,7 +1,3 @@
-library(extRemes)
-library(SpatialExtremes)
-library(dbscan)
-
 knn_info <- knn_info %>%
   mutate(x = longitude) %>%
   mutate(y = latitude) %>%
@@ -12,7 +8,7 @@ knn_info <- knn_info %>%
 frech_data = apply(test_max, 2, gev2frech_with_tryCatch)
 data = frech_data
 
-grid = knn_wa_grid %>%
+grid = knn_grid %>%
   mutate(x = longitude) %>%
   mutate(y = latitude) %>%
   mutate(knn_id = knn)
@@ -21,14 +17,15 @@ medoid_indexes = fmado_clusters$medoids
 len = length(medoid_indexes)
 all_models <- vector("list", len)
 all_ellipses = NULL
+samp_size = 30
 for(i in 1:len){
   print(i)
   use_id = i
-  samp_size = 50 #max(sum(knn_info$knn == use_id)*2/3, 10)
+  # samp_size = floor(max(sum(knn_info$knn == use_id)*2/3, 10))
   model_list <- tryCatch({fit_smith_model(data = data, knn_info = knn_info,
                              medoid_indexes = medoid_indexes, use_id = i,
                              grid, min_class_prob = 0.5, high_class_prob = 0.75,
-                             num_samps = 5, samp_size = samp_size,
+                             num_samps = 50, samp_size = samp_size,
                              min_common_obs = 10, min_pairs = choose(10,2),
                              ratio_threshold = 0.1, ellipse_alpha = 0.1,
                              max_iter = 3,
@@ -52,7 +49,7 @@ all_ellipses <- all_ellipses %>%
   filter(!is.na(x))
 
 # plot result
-ell_plot <- ggplot() + #knn_wa_plot +
+ell_plot <- knn_plot +
   geom_path(data = all_ellipses, aes(x=x, y =y, group = plot_index), alpha = 0.25) +
   theme_bw()
 

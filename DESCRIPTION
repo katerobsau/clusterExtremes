@@ -10,8 +10,9 @@ License: What license is it under?
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1
-Imports: 
+Depends: 
   class,
+  cluster,
   dbscan,
   doParallel,
 	dplyr,
@@ -23,4 +24,5 @@ Imports:
 	psych,
 	RaingleExtremes,
 	SDMTools,
-	SpatialExtremes
+	SpatialExtremes,
+	tidyr

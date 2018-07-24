@@ -13,7 +13,7 @@
 #' x_frech1 = gev2frech_with_tryCatch(x, gev_par)
 
 gev2frech_with_tryCatch <- function(x, gev_par = NULL){
-
+  print("PARALLELISE ME")
   if(is.null(gev_par))
     gev_par = fit_fevd_with_tryCatch(x)
 
