@@ -2,14 +2,14 @@ wa_id = 2; wa_k = 7
 ea_id = 3; ea_k = 40
 tas_id = 4; tas_k = 6
 
-region_id = ea_id
-k_values = seq(30,45,5) #2:10
+region_id = wa_id
+k_values = 6:17 #seq(30,45,5)
 thin_region = FALSE
-hclust_method = "mcquitty"
+hclust_method = "average"
 
 # plot the clusters
-text.type.large <- element_text(size = 14)
-text.type.small <- element_text(size = 12)
+text.type.large <- element_text(size = 12)
+text.type.small <- element_text(size = 11)
 
 ### ---------------------------------------------------------------------------
 
@@ -18,11 +18,10 @@ if(region_id == wa_id) k = wa_k
 if(region_id == ea_id) k = ea_k
 
 k_nbrs = 20
-fmado_data = readRDS(paste(working_dir, "Data/fmado_data.rds", sep = ""))
 min_common_years = 20
 max_euclid = 1
-grid_dx = 0.2
-grid_dy = 0.2
+grid_dx = 0.1
+grid_dy = 0.1
 
 max_per_grid = 1
 thin_dx = 0.1
@@ -31,6 +30,7 @@ thin_dy = 0.1
 min_dist = 0.3#grid_dx*1.5
 
 working_dir = "/Users/saundersk1/Dropbox/Hard Drive/R/2018/ChapterCluster/"
+fmado_data = readRDS(paste(working_dir, "Data/fmado_data.rds", sep = ""))
 region_coords = readRDS(paste(working_dir, "Data/region_coords.rds", sep = ""))
 
 source("/Users/saundersk1/Dropbox/Hard Drive/R/2018/ChapterCluster/R/utils_dist.R")
@@ -176,7 +176,7 @@ cluster_plot <- ggplot() +
   # geom_point(data = medoid_coords,
   #            aes(x = longitude, y = latitude, group = num_clusters)) +
   coord_fixed() +
-  facet_wrap(~num_clusters, ncol = 3) +
+  facet_wrap(~num_clusters, ncol = 4) +
   geom_path(data = mainland_df, aes(x = Long, y = Lat)) +
   geom_path(data = tas_df, aes(x = Long, y = Lat)) +
   scale_x_continuous(limits = range(plot_coords$longitude) + c(-0.1, 0.1)) +
@@ -274,7 +274,7 @@ knn_plot <- ggplot() +
   coord_fixed() +
   xlab("Longitude") +
   ylab("Latitute") +
-  facet_wrap(~num_clusters, ncol = 3) +
+  facet_wrap(~num_clusters, ncol = 4) +
   ggtitle(paste("Hierarchical Clustering using", hclust_method)) +
   theme_bw() +
   theme(#legend.position = "none",
