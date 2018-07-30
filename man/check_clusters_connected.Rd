@@ -24,9 +24,8 @@ Returns the a data frame with columns block, which is the year, and p_value.
 }
 \description{
 Takes a set of coordinates and overlays a grid. Using the grid, we check if
-coordinates fall in adjacent grid cells, where majority rules classification.
-Referencing is done relative to the lower left corner of the grid.
-If desired this function returns as boolean classificaiton if the connection is
+grid regions are connected. Referencing is done relative to the lower left
+corner of the grid. If desired, this function returns as boolean classification
 relative the location of a representative object.
 }
 \details{
@@ -86,4 +85,13 @@ connected_plot <- ggplot(data = coords, aes(x = x, y = y)) +
   geom_point(aes(col = as.factor(connected)))
 
 connected_plot
+
+connected1 = check_clusters_connected(coords = coords,
+                      grid = grid, medoid_ref = FALSE)
+
+connected1_plot <- ggplot(data = coords, aes(x = x, y = y)) +
+  geom_point(aes(col = as.factor(connected1)))
+
+connected1_plot
+print("Should write code to change medoid to representative index")
 }

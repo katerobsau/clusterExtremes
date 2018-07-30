@@ -122,7 +122,7 @@ fit_smith_model <- function(data, knn_info, medoid_indexes, use_id,
 
   id_check = all(knn_info$cluster_id %in% knn_info$knn_id) &
     all(knn_info$knn_id %in% knn_info$cluster_id)
-  if(id_check == FALSE) stop("Error: cluster_id and knn_id does not match")
+  if(id_check == FALSE) warning("Error: cluster_id and knn_id does not match")
 
   id1_check = all(knn_info$knn_id %in% grid$knn_id) &
     all(grid$knn_id %in% knn_info$knn_id)

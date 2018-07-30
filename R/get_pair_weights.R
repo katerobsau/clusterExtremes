@@ -1,12 +1,14 @@
 #' Set pair weights
 #'
-#' For fitting a statistical model using composite likelihood pairs of
-#' stations must have overlapping observations.
+#' Data is matrix, where the rows index the observations and columns index
+#' the points. We return a vector of weights, for pairs when column index
+#' i < j. This is useful for fitting statistical models using
+#' composite likelihood, as pairs must have overlapping observations.
 #'
 #' Here we set a minimum number of overlapping observations before we
 #' will consider pairs for fitting, otherwise the weight is set to 0.
 #'
-#' @param data data frame with observations
+#' @param data data frame with rows of observations, and columns of points.
 #' @param min_common_obs minimum number of shared observations, default is 10
 #'
 #' @return Returns a vector of pair weights for input into composite likelihood
@@ -14,51 +16,64 @@
 #' @examples
 #'
 #' ##Define the coordinate of each location
+#' library(SpatialExtremes)
 #' n.site <- 30
 #' locations <- matrix(runif(2*n.site, 0, 10), ncol = 2)
 #' colnames(locations) <- c("lon", "lat")
 #'
 #' ## Simulate a max-stable process - with unit Frechet margins
-#' data <- rmaxstab(40, locations, cov.mod = "whitmat", nugget = 0, range = 3,
-#'                 smooth = 0.5)
+#' data <- SpatialExtremes::rmaxstab(40, locations, cov.mod = "whitmat",
+#'                  nugget = 0, range = 3, smooth = 0.5)
 #'
-#' data[1:40, 1] = NA
-#' data[1:20, 2] = NA
-#'
-#' pairs = expand.grid(j = 1:30, i = 1:30) %>%
-#'  as.data.frame() %>%
-#'  filter(i < j) %>%
-#'  mutate(pair_weights = ifelse(i == 1 | j == 1, 0, 1))
-#'
-#' pair_weights <- utils_get_pair_weights(data, 10)
+#' example_pairs = expand.grid(i = 1:30, j = 1:30) %>%
+#'   as.data.frame() %>%
+#'   filter(i < j) %>%
+#'   mutate(pair_weights = ifelse(i == 1 | j == 1, 0, 1))
 #'
 #'##Fit a max-stable process using the Schlather's model
 #' loc.form <-~ 1
 #' scale.form <-~ 1
 #' shape.form <-~ 1
 #'
-#' # fails with the na column of data
-#' m = fitmaxstab(data, locations, "whitmat", loc.form, scale.form,
-#'               shape.form) #, weights = pair_weights)
+#' # fails with the NA column of data
+#' fit_data = data
+#' fit_data[1:40, 1] = NA
+#' m =  SpatialExtremes::fitmaxstab(fit_data, locations, "whitmat",
+#'              loc.form, scale.form, shape.form)
 #'
-#' # passes without the na column of data
-#' m = fitmaxstab(data[,-1], locations[-1,], "whitmat", loc.form, scale.form,
+#' # fits without the na column of data
+#' m =  SpatialExtremes::fitmaxstab(fit_data[,-1], locations[-1,], "whitmat", loc.form, scale.form,
 #'                             shape.form)
-#' start_list = as.list(m$fitted.values)
 #'
-#' # try weights (j > i)
-#' m_wghts = fitmaxstab(data, locations, "whitmat", loc.form, scale.form,
-#'                     shape.form, start = start_list, weights = pairs$pair_weights)
+#' # The function fitmaxstab() doesn't pass the weights when initialising
+#' #   the starting values, this causes atomatic failure.
+#' #   To demonstrate fitmaxstab() works with weights, we pass a set of start
+#' #   values.
+#' #   To make it clear we have correct weights we have had to use a creative
+#' #   example, where we have altered the data to ensure the fit fails.
+#' start_list = as.list(m$fitted.values)
+#' fit_data = data
+#' fit_data[1:40, 1:10] = 100
+#' temp_data = data
+#' temp_data[1:40, 1:10] = NA
+#' pair_weights <- get_pair_weights(temp_data, 10)
+#' m_no_wghts =  SpatialExtremes::fitmaxstab(fit_data, locations, "whitmat",
+#'                     loc.form, scale.form, shape.form,
+#'                     start = start_list)
+#' m_wghts =  SpatialExtremes::fitmaxstab(fit_data, locations, "whitmat",
+#'                     loc.form, scale.form, shape.form,
+#'                     start = start_list,
+#'                     weights = pair_weights)
 get_pair_weights <- function(data, min_common_obs = 10){
 
   num_stns = ncol(data)
 
   common_count <- get_num_common_obs(data)
 
-  pairs = expand.grid(j = 1:num_stns, i = 1:num_stns) %>%
+  pairs = expand.grid(i = 1:num_stns, j = 1:num_stns) %>%
     as.data.frame() %>%
     filter(i < j) %>%
-    mutate(pair_weights = ifelse(i == 1 | j == 1, 0, 1)) %>%
+    mutate(pair_weights = 1) %>%
     mutate(common = common_count) %>%
     mutate(pair_weights = ifelse(common < min_common_obs, 0, pair_weights))
 
