@@ -16,7 +16,7 @@ get_grid_for_classification(coords, grid_space = 1, min_dist = 1.5 *
 \item{min_dist}{we restrict the grid to only cover the provided coordinates
 any grid point greater than the min_dist away is removed (default is 1.5*grid_space)}
 
-\item{restric_aus}{check if the coords fall within australia to
+\item{restrict_aus}{check if the coords fall within australia to
 reduce computational time (default = TRUE)}
 }
 \value{

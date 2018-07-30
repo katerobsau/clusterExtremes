@@ -2,9 +2,9 @@
 % Please edit documentation in R/check_cluster_connected.R
 \name{check_clusters_connected}
 \alias{check_clusters_connected}
-\title{Check the classfied regions are connected}
+\title{Check if a regions is connected}
 \usage{
-check_clusters_connected(coords, medoid, grid)
+check_clusters_connected(coords, medoid, grid, medoid_ref = TRUE)
 }
 \arguments{
 \item{coords}{data frame with columns x, y and class_id
@@ -12,7 +12,10 @@ class_id takes boolean values of 0 and 1}
 
 \item{medoid}{index of the medoid in the coords data frame}
 
-\item{grid}{a data frame that describes a grid, columsn of x, y and class_id}
+\item{grid}{a data frame that describes a grid, columns of x, y and class_id}
+
+\item{medoid_ref}{if the connection should be relative to the location of a
+a representative object, such as a medoid}
 
 \item{grid_space}{spacing of the grid, equal in x and y}
 }
@@ -20,14 +23,17 @@ class_id takes boolean values of 0 and 1}
 Returns the a data frame with columns block, which is the year, and p_value.
 }
 \description{
-Under the classification, regions can be disconnected.
-For fitting max-stable models, we do not want to group stations in
-disjoint regions. This function returns as boolean if the station is density
-connected to it's medoid
+Takes a set of coordinates and overlays a grid. Using the grid, we check if
+coordinates fall in adjacent grid cells, where majority rules classification.
+Referencing is done relative to the lower left corner of the grid.
+If desired this function returns as boolean classificaiton if the connection is
+relative the location of a representative object.
 }
 \details{
-For the two types of classification, we use 0 to denote the classfication
-we are interested in and 1 otherwise.
+To reference coordinates we are interested in we use a boolean classification.
+If we want to consider all points, then the classifcation is all 1.
+If we want to consider a subset, set those points we aren't intersted in to 0,
+those we are interested in to 1.
 }
 \examples{
 

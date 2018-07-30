@@ -8,7 +8,7 @@
 #' (defaults to 1)
 #' @param min_dist we restrict the grid to only cover the provided coordinates
 #' any grid point greater than the min_dist away is removed (default is 1.5*grid_space)
-#' @param restric_aus check if the coords fall within australia to
+#' @param restrict_aus check if the coords fall within australia to
 #' reduce computational time (default = TRUE)
 #' @return returns a data frame of gridded coordinates with columns labelled x and y
 #' @export

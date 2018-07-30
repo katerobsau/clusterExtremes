@@ -1,18 +1,22 @@
-#' Check the classfied regions are connected
+#' Check if a regions is connected
 #'
-#' Under the classification, regions can be disconnected.
-#' For fitting max-stable models, we do not want to group stations in
-#' disjoint regions. This function returns as boolean if the station is density
-#' connected to it's medoid
+#' Takes a set of coordinates and overlays a grid. Using the grid, we check if
+#' grid regions are connected. Referencing is done relative to the lower left
+#' corner of the grid. If desired, this function returns as boolean classification
+#' relative the location of a representative object.
 #'
-#' For the two types of classification, we use 0 to denote the classfication
-#' we are interested in and 1 otherwise.
+#' To reference coordinates we are interested in we use a boolean classification.
+#' If we want to consider all points, then the classifcation is all 1.
+#' If we want to consider a subset, set those points we aren't intersted in to 0,
+#' those we are interested in to 1.
 #'
 #' @param coords data frame with columns x, y and class_id
 #' class_id takes boolean values of 0 and 1
 #' @param medoid index of the medoid in the coords data frame
-#' @param grid a data frame that describes a grid, columsn of x, y and class_id
+#' @param grid a data frame that describes a grid, columns of x, y and class_id
 #' @param grid_space spacing of the grid, equal in x and y
+#' @param medoid_ref if the connection should be relative to the location of a
+#' a representative object, such as a medoid
 #'
 #' @return Returns the a data frame with columns block, which is the year, and p_value.
 #' @export
@@ -67,9 +71,18 @@
 #'   geom_point(aes(col = as.factor(connected)))
 #'
 #' connected_plot
+#'
+#' connected1 = check_clusters_connected(coords = coords,
+#'                       grid = grid, medoid_ref = FALSE)
+#'
+#' connected1_plot <- ggplot(data = coords, aes(x = x, y = y)) +
+#'   geom_point(aes(col = as.factor(connected1)))
+#'
+#' connected1_plot
+#' print("Should write code to change medoid to representative index")
 
 check_clusters_connected <- function(coords, medoid,
-                                     grid){
+                                     grid, medoid_ref = TRUE){
 
   grid_space = min(dist(grid %>% select(x,y)))
 
@@ -85,12 +98,17 @@ check_clusters_connected <- function(coords, medoid,
   dd_sum = dd + dd_class
   db = dbscan(dd_sum, eps = grid_space, minPts = 1)
 
-  medoid_coords <- coords[medoid, ]
-  medoid_db <- db$cluster[medoid]
-
   density_connected <- all_coords %>%
-    mutate(db_id = db$cluster) %>%
-    mutate(db_id = ifelse(db_id == medoid_db, 1, 0)) %>%
+    mutate(db_id = db$cluster)
+
+  if(medoid_ref){
+    medoid_coords <- coords[medoid, ]
+    medoid_db <- db$cluster[medoid]
+    density_connected <- density_connected %>%
+      mutate(db_id = ifelse(db_id == medoid_db, 1, 0))
+  }
+
+  density_connected <- density_connected %>%
     select(db_id) %>%
     unlist()
 
