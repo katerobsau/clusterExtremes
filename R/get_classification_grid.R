@@ -28,15 +28,17 @@
 #' points(grid_output)
 #' points(coords, col = "red", pch = 20)
 get_grid_for_classification <- function(coords, grid_space = 1,
-                                    min_dist = 1.5*grid_space,
+                                    min_dist,
                                     restrict_aus = TRUE){
+
+  if(missing(min_dist)){min_dist = 1.5*grid_space}
 
   # Create grid for classification
   long = range(coords$x) + c(-grid_space, grid_space)
   lat  = range(coords$y) + c(-grid_space, grid_space)
   long.seq = seq(min(long), max(long), by = grid_space)
   lat.seq = seq(min(lat), max(lat), by = grid_space)
-  full_grid = expand.grid(longitude = long.seq, latitude = lat.seq)
+  full_grid = expand.grid(x = long.seq, y = lat.seq)
 
   if(restrict_aus == TRUE){
     # restrict grid to within australia

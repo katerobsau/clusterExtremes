@@ -1,9 +1,11 @@
 #' Set pair weights
 #'
-#' Data is matrix, where the rows index the observations and columns index
-#' the points. We return a vector of weights, for pairs when column index
-#' i < j. This is useful for fitting statistical models using
+#' When fitting statistical models such as
 #' composite likelihood, as pairs must have overlapping observations.
+#' This function takes a data, where the rows index the observations and
+#' columns index the points. We return a vector of weights,
+#' for pairs (i,j), where column index i < j and there is minimum
+#' number of common observations.
 #'
 #' Here we set a minimum number of overlapping observations before we
 #' will consider pairs for fitting, otherwise the weight is set to 0.
