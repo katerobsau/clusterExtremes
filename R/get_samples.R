@@ -33,6 +33,7 @@ get_samples <- function(n, sample_type, num_samples = 1, samp_size = NULL,
   if(sample_type == "partition"){
     ord = sample(1:n , n, replace = FALSE)
     num_rows = floor(n/num_partitions)
+    ord = ord[1:(num_partitions*num_rows)]
     samples = matrix(ord, num_rows, num_partitions)
   }
 

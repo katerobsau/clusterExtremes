@@ -43,7 +43,9 @@ outer_wrapper_fitmaxstab <- function(fit_info,
                                        frech_bool = TRUE, cov_mod,
                                        min_common_obs = 10, min_pairs = 10,
                                        fit_subsample = FALSE,
-                                       sample_type = NULL, ..args...){
+                                       sample_type = NULL, ...){
+
+  args <- list(...)
 
   ### ---------------------------------------------------------------------------
 
@@ -98,14 +100,17 @@ outer_wrapper_fitmaxstab <- function(fit_info,
     model_list = list(fitM)
   }else{
     fit_sample = switch(sample_type,
-                        "random" = get_samples(n = nrow(fit_info), sample_type = sample_type,
-                                               num_samples = num_samples, samp_size = samp_size),
-                        "partition" = get_samples(n = nrow(fit_info), sample_type = sample_type,
-                                                  num_partitions = num_partitions),
-                        "percentage" = get_samples(n = nrow(fit_info), sample_type = sample_type,
-                                                   percentage = percentage))
+                        "random" = get_samples(n = nrow(fit_info),
+                                               sample_type = "random",
+                                               ...),
+                        "partition" = get_samples(n = nrow(fit_info),
+                                                  sample_type = "partition",
+                                                  ...),
+                        "percentage" = get_samples(n = nrow(fit_info),
+                                                   sample_type = "percentage",
+                                                   ...))
     model_list =
-      foreach(i = 1:num_partitions, .packages = c("clusterExtremes")) %do%
+      foreach(i = 1:args$num_partitions, .packages = c("clusterExtremes")) %do%
       loop_function(i, fit_sample, data_fit, coord_fit,
                     cov_mod, min_common_obs, min_pairs)
   }
