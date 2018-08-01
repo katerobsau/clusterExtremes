@@ -4,8 +4,8 @@
 \alias{get_grid_for_classification}
 \title{Generate a grid}
 \usage{
-get_grid_for_classification(coords, grid_space = 1, min_dist = 1.5 *
-  grid_space, restrict_aus = TRUE)
+get_grid_for_classification(coords, grid_space = 1, min_dist,
+  restrict_aus = TRUE)
 }
 \arguments{
 \item{coords}{a data frame of coordinates with columns labelled x and y}

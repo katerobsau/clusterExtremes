@@ -39,7 +39,7 @@ get_medoid <- function(coords, DD){
     relative_dist[i] <- all_pnts %>%
       filter(x == i) %>%
       summarise(total_dist = sum(dist)) %>%
-      as.numeric
+      as.numeric()
   }
 
   medoid_i = which.min(relative_dist)
