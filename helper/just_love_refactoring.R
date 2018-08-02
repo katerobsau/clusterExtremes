@@ -1,76 +1,78 @@
 ### ---------------------------------------------------------------------------
 
-point_info <- data.frame(test_coords, cluster_id = hcluster_list[[4]])
+point_info <- data.frame(test_coords, cluster_id = hcluster_list[[10]])
 names(point_info)[2:3] = c('x', 'y')
-var_name = "cluster_id"
-use_id = 7
-one_fit = FALSE
-min_common_obs = 10
-min_pairs = 10
-frech_bool = TRUE
-cov_mod = "gauss"
-# sample_type = "partition"; num_partitions = 5
-sample_type = "random"; num_samples = 10; samp_size = 20;
-# sample_type = "percentage"; percentage = 0.75
-
-# ## GENERATE AN EXAMPLE
-#
-# n.site <- 60
-# locations <- matrix(runif(2*n.site, 0, 10), ncol = 2)
-# cluster_id <- rep( c(1,2), each = n.site/2)
-# id <- paste("ID", as.character(1:n.site), sep = "")
-#
-# data <- SpatialExtremes::rmaxstab(100, locations, cov.mod = "gauss",
-#                   cov11 = 1, cov12 = 0, cov22 = 1)
-# data <- as.data.frame(data)
-# names(data) = id
-#
-# point_info <- data.frame(id,
-#                          x = locations[,1], y = locations[,2],
-#                          cluster_id,
-#                          stringsAsFactors = FALSE)
-#
-# use_id = "1"
 
 cluster_plot <-  ggplot(data = point_info) +
-  geom_point(aes(x=x , y = y, col = as.factor(cluster_id)))
+  geom_point(aes(x=x , y = y, col = as.factor(cluster_id),
+                 shape = as.factor(cluster_id%%6)))
 
-cluster_plot
+library(plotly)
+ggplotly(cluster_plot)
+
+### ---------------------------------------------------------------------------
+# use_id = 5
+# var_name = "cluster_id"
+#
+# ### IDENTIFY CLUSTER/KNN ID FOR FITTING
+# if(missing(var_name) | missing(use_id)){
+#   point_info <- point_info %>%
+#     dplyr::mutate(binary_clase = TRUE)
+# }else{
+#   point_info <- create_binary_class(point_info = point_info,
+#                                     var_name = var_name, use_id = use_id)
+# }
+#
+# if(!any(point_info$binary_class == TRUE))
+#   stop("No binary class matched the use_id provided")
+#
+# fit_info <- point_info %>%
+#   dplyr::filter(binary_class == TRUE)
 
 ### ---------------------------------------------------------------------------
 
-fit_subsample = TRUE
+all_ids <- unique(point_info$cluster_id)
+convert = FALSE
+frech_bool = TRUE
 min_common_obs = 10
 min_pairs = 10
-frech_bool = TRUE
 cov_mod = "gauss"
-# sample_type = "partition"; num_partitions = 5
-sample_type = "random"; num_samples = 10; samp_size = 20;
-# sample_type = "percentage"; percentage = 0.75
+fit_subsample = TRUE
+sample_type = "percentage"
+percentage = 90
+num_samples = 10
 
-### IDENTIFY CLUSTER/KNN ID FOR FITTING
-if(missing(var_name) | missing(use_id)){
-  point_info <- point_info %>%
-    dplyr::mutate(binary_clase = TRUE)
-}else{
-  point_info <- create_binary_class(point_info = point_info,
-                                    var_name = var_name, use_id = use_id)
+num_ids = length(all_ids)
+all_models <- vector("list", num_ids)
+names(all_models) <- all_ids
+for(i in 1:num_ids){
+  use_id = all_ids[i]
+  fit_info = point_info %>% filter(cluster_id == use_id)
+  obs_data = test_max %>% select(fit_info$id)
+
+  if(nrow(fit_info) < 10){
+    all_models[[i]] = NULL
+    next
+  }
+
+  model_list = outer_wrapper_fitmaxstab(fit_info = fit_info,
+                obs_data = obs_data, convert = convert,
+                frech_bool = frech_bool, cov_mod = cov_mod,
+                min_common_obs = min_common_obs, min_pairs = min_pairs,
+                fit_subsample = fit_subsample,
+                sample_type = sample_type, percentage = percentage, num_samples = num_samples)
+
+  all_models[[i]] <- model_list
+
 }
 
-if(!any(point_info$binary_class == TRUE))
-  stop("No binary class matched the use_id provided")
-
-fit_info <- point_info %>%
-  dplyr::filter(binary_class == TRUE)
-
-### ---------------------------------------------------------------------------
+# -----------------------------------------------------------------------
 
 ### CHECK THE FITS
 
 # caluclate ratio of elliptical curves
 ratio_values = lapply(model_list, utils_check_cov_ratio) %>%
   unlist()
-
 
 
 ### ---------------------------------------------------------------------------
@@ -240,3 +242,5 @@ if(length(possible_stns) < samp_size + 1){
 # -----------------------------------------------------------------------------
 
 }
+
+

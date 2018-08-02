@@ -50,7 +50,7 @@ shape.form <-~ 1
 
 # fails with the NA column of data
 m =  SpatialExtremes::fitmaxstab(sim_data, locations, "whitmat")
-m_wrapper = wrapper_fitmaxstab(sim_data, locations, cov_mod = "whitmat")
+m_wrapper = inner_wrapper_fitmaxstab(sim_data, locations, cov_mod = "whitmat")
 
 all(m$fitted.values == m_wrapper$fitted.values)
 

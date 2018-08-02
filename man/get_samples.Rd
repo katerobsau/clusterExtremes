@@ -12,7 +12,7 @@ get_samples(n, sample_type, num_samples = 1, samp_size = NULL,
 
 \item{sample_type}{string of "random", "partition" or "percentage"}
 
-\item{num_samples}{for random - number of sub-samples, default is 1}
+\item{num_samples}{for random and percentage - number of sub-samples, default is 1}
 
 \item{samp_size}{for random - size of the sub-sample to take}
 

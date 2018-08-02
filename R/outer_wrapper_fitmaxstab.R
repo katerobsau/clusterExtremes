@@ -34,9 +34,14 @@
 #' names(sim_data) <- id
 #' fitM = outer_wrapper_fitmaxstab(fit_info = fit_info, obs_data = sim_data,
 #'                 cov_mod = "gauss")
-#' model_list = outer_wrapper_fitmaxstab(fit_info = fit_info, obs_data = sim_data,
+#'
+#' eg1_model_list = outer_wrapper_fitmaxstab(fit_info = fit_info, obs_data = sim_data,
 #'                 cov_mod = "gauss", fit_subsample = TRUE,
 #'                 sample_type = "partition", num_partitions = 2)
+#'
+#' eg2_model_list = outer_wrapper_fitmaxstab(fit_info = fit_info, obs_data = sim_data,
+#'                 cov_mod = "gauss", fit_subsample = TRUE,
+#'                 sample_type = "percentage", num_samples = 2, percentage = 80)
 #'
 outer_wrapper_fitmaxstab <- function(fit_info,
                                        obs_data, convert = FALSE,
@@ -55,7 +60,7 @@ outer_wrapper_fitmaxstab <- function(fit_info,
       as.data.frame()
     frech_bool = TRUE
   }else{
-    data = obs_data
+    data = obs_data %>% as.data.frame()
   }
 
   ### ---------------------------------------------------------------------------
@@ -110,7 +115,7 @@ outer_wrapper_fitmaxstab <- function(fit_info,
                                                    sample_type = "percentage",
                                                    ...))
     model_list =
-      foreach(i = 1:args$num_partitions, .packages = c("clusterExtremes")) %do%
+      foreach(i = 1:ncol(fit_sample), .packages = c("clusterExtremes")) %do%
       loop_function(i, fit_sample, data_fit, coord_fit,
                     cov_mod, min_common_obs, min_pairs)
   }

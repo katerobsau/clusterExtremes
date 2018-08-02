@@ -5,7 +5,7 @@
 #'
 #' @param n size of the vector we are sampling from
 #' @param sample_type string of "random", "partition" or "percentage"
-#' @param num_samples for random - number of sub-samples, default is 1
+#' @param num_samples for random and percentage - number of sub-samples, default is 1
 #' @param samp_size for random - size of the sub-sample to take
 #' @param num_paritions for partition - number of ways to partition n and generate
 #' sub-samples. If the num_partions does not divide n equally, the floor is taken.
@@ -41,6 +41,8 @@ get_samples <- function(n, sample_type, num_samples = 1, samp_size = NULL,
     if(percentage > 100 | percentage < 0)
       stop("Percentage value supplied must be greater than 0 and less than 100")
     samp_size = floor(n*percentage/100)
+    if(samp_size < 1)
+      stop("Percentage supplied produced samp_size less than 1")
     samples = replicate(num_samples, sample(1:n, samp_size, replace = FALSE))
   }
 
