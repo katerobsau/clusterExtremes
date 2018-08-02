@@ -12,6 +12,8 @@
 #' @param min_common_obs minimum number of common pairwise observations,
 #' weight is set to zero in fitting otherwise (default is 10)
 #' @param min_pairs set a minimum number of pairs needed for fitting (default is 10)
+#' @param start_list an option list of start values to initilise
+#' the fitmaxstab() model (default = NULL)
 
 #'
 #' @return Returns a fitted maxstable model from the package SpatialExtremes,
@@ -37,12 +39,14 @@
 #'
 #' # fails with the NA column of data
 #' m =  SpatialExtremes::fitmaxstab(sim_data, locations, "whitmat")
-#' m_wrapper = inner_wrapper_fitmaxstab(sim_data, locations, cov_mod = "whitmat")
+#' m_wrapper = inner_wrapper_fitmaxstab(data_fit = sim_data,
+#'                  coord_fit = locations, cov_mod = "whitmat")
 #'
 #'all(m$fitted.values == m_wrapper$fitted.values)
 #'
 inner_wrapper_fitmaxstab <- function(data_fit, coord_fit, cov_mod = "gauss",
-                                     frech_bool = TRUE, min_common_obs = 10, min_pairs = 10){
+                                     frech_bool = TRUE, min_common_obs = 10,
+                                     min_pairs = 10){
 
   data_fit = as.matrix(data_fit)
   coord_fit = as.matrix(coord_fit)

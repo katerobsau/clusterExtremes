@@ -86,6 +86,7 @@ outer_wrapper_fitmaxstab <- function(fit_info,
   ### FIT THE MAXSTABLE MODEL
   loop_function <- function(i, fit_sample, data_fit, coord_fit, cov_mod,
                             min_common_obs, min_pairs){
+
     sample_stns = fit_sample[,i]
     sample_data_fit = data_fit[ ,sample_stns]
     sample_coord_fit = coord_fit[sample_stns, ]
@@ -95,6 +96,7 @@ outer_wrapper_fitmaxstab <- function(fit_info,
                                     min_common_obs = min_common_obs,
                                     min_pairs = min_pairs)
     return(fitM)
+
   }
 
   if(fit_subsample == FALSE){
