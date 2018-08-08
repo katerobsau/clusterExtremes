@@ -4,8 +4,8 @@
 \alias{classify_with_kknn}
 \title{Classify a grid using weighted k nearest neighbours}
 \usage{
-classify_with_kknn(points_train, points_classify, knn_value, kernel = "inv",
-  distance = 2)
+classify_with_kknn(points_train, points_classify, knn_value,
+  kernel = "inv", distance = 2)
 }
 \arguments{
 \item{points_train}{a data frame of coordinates with columns
@@ -43,13 +43,15 @@ grid_domain = get_grid_for_classification(coords = coords,
 coords$cluster_id = 1
 coords$cluster_id[coords$x < 4] = 2
 
-grid_ouput = classify_with_kknn(points_train = coords,
+grid_output = classify_with_kknn(points_train = coords,
        points_classify = grid_domain,
  knn_value = 3)
 
-grid_classified = grid_output[[1]]
-plot(grid_classified$x, grid_classified$y, col = grid_classified$class_id,
-     pch = 3)
-points(coords, col = coords$cluster_id, pch = 20)
+ggplot() +
+ geom_point(data = grid_output,
+    aes(x=x, y =y, col = as.factor(class_id),
+    alpha = prob_summary), shape = 3) +
+ geom_point(data = coords,
+    aes(x=x, y =y, col = as.factor(cluster_id)))
 
 }

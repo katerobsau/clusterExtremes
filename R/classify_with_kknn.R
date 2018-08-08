@@ -3,8 +3,9 @@
 #' Function takes a set of points that have been clustered,
 #' and then classifys the grid.
 #'
-#' @param points_train a data frame of coordinates with columns
-#' labelled x and y and a cluster_id
+#' @param coords a data frame of coordinates with columns
+#' labelled x and y
+#' @param cluster_ids the cluster_ids corresponding to the coords
 #' the forumula for classification, is cluster_id ~ x + y + xy
 #' @param points_classify a data frame of coordinates for classification,
 #' with columns labelled x and y
@@ -28,10 +29,11 @@
 #' grid_domain = get_grid_for_classification(coords = coords,
 #'      restrict_aus = FALSE)
 #'
-#' coords$cluster_id = 1
-#' coords$cluster_id[coords$x < 4] = 2
+#' cluster_ids = rep(1, nrow(coords))
+#' cluster_ids[coords$x < 4] = 2
 #'
-#' grid_output = classify_with_kknn(points_train = coords,
+#' grid_output = classify_with_kknn(coords = coords,
+#'        cluster_ids = cluster_ids
 #'        points_classify = grid_domain,
 #'  knn_value = 3)
 #'
@@ -42,12 +44,19 @@
 #'  geom_point(data = coords,
 #'     aes(x=x, y =y, col = as.factor(cluster_id)))
 #'
-classify_with_kknn <- function(points_train, points_classify,
+classify_with_kknn <- function(coords,
+                               cluster_ids,
+                               points_classify,
                                knn_value,
                                kernel = "inv",
                                distance = 2){
 
-  set_learn <- points_train %>% select(x,y,cluster_id)
+  if(length(cluster_ids) != nrow(coords))
+    stop("Error: number of cluster_ids does not match coords")
+
+  set_learn <- coords %>%
+    mutate(cluster_id = cluster_ids) %>%
+    select(x,y,cluster_id)
   set_learn$cluster_id <- as.factor(set_learn$cluster_id)
 
   results_kknn <- kknn::kknn(cluster_id ~ ., train = set_learn,

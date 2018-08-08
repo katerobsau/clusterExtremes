@@ -76,9 +76,9 @@ all_ellipses_df <- do.call(rbind, all_ellipses) %>%
 ell_plot <-
   ggplot() +
   # cluster_plot +
-  geom_path(data = mainland_df, aes(x = Long, y = Lat)) +
-  geom_path(data = all_ellipses_df, aes(x=x, y= y, group = plot_group), alpha = 0.05) +
-  scale_x_continuous(limits = c(135,155)) +
-  scale_y_continuous(limits = c(-40,-20))
+  # geom_path(data = mainland_df, aes(x = Long, y = Lat)) +
+  geom_path(data = all_ellipses_df, aes(x=x, y= y, group = plot_group), alpha = 0.05) #+
+  # scale_x_continuous(limits = c(135,155)) +
+  # scale_y_continuous(limits = c(-40,-20))
 ell_plot
 

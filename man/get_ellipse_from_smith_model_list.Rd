@@ -5,8 +5,8 @@
 \title{Converts GEV distrubted data to unit Frechet data
 All functions are wrapped to handle any errors}
 \usage{
-get_ellipse_from_smith_model_list(model_list, medoid = data.frame(x = 0, y =
-  0))
+get_ellipse_from_smith_model_list(model_list, medoid = data.frame(x = 0,
+  y = 0))
 }
 \arguments{
 \item{model_list}{list of smith max-stable model fits}

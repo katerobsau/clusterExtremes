@@ -33,20 +33,21 @@
 #'                  nugget = 0, range = 3, smooth = 0.5)
 #'
 #'##Fit a max-stable process using the Schlather's model
-#' loc.form <-~ 1
-#' scale.form <-~ 1
-#' shape.form <-~ 1
-#'
-#' # fails with the NA column of data
 #' m =  SpatialExtremes::fitmaxstab(sim_data, locations, "whitmat")
 #' m_wrapper = inner_wrapper_fitmaxstab(data_fit = sim_data,
 #'                  coord_fit = locations, cov_mod = "whitmat")
+#' all(m$fitted.values == m_wrapper$fitted.values)
 #'
-#'all(m$fitted.values == m_wrapper$fitted.values)
+#'## Pass a start value
+#'start_list = as.list(m$fitted.values)
+#'
+#' m_start = inner_wrapper_fitmaxstab(data_fit = sim_data,
+#'                  coord_fit = locations, cov_mod = "whitmat",
+#'                  start = start_list)
 #'
 inner_wrapper_fitmaxstab <- function(data_fit, coord_fit, cov_mod = "gauss",
                                      frech_bool = TRUE, min_common_obs = 10,
-                                     min_pairs = 10){
+                                     min_pairs = 10, ...){
 
   data_fit = as.matrix(data_fit)
   coord_fit = as.matrix(coord_fit)
@@ -64,7 +65,7 @@ inner_wrapper_fitmaxstab <- function(data_fit, coord_fit, cov_mod = "gauss",
                         cov.mod = cov_mod,
                         iso = FALSE,
                         weights = pair_weights,
-                        fit.marge = FALSE)
+                        fit.marge = FALSE, ...)
     }else{
       fitM = fitmaxstab(data = data_fit,
                         coord = coord_fit,
@@ -74,7 +75,7 @@ inner_wrapper_fitmaxstab <- function(data_fit, coord_fit, cov_mod = "gauss",
                         marg.cov = NULL,
                         cov.mod = cov_mod,
                         iso = FALSE,
-                        weights = pair_weights)
+                        weights = pair_weights, ...)
     }
     fitM;
   }, warning = function(w){

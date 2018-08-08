@@ -1,5 +1,12 @@
 
-# pnt <- point_info[1,]
-# grid_pnt <- grid_classify %>%
-#   filter(x <= pnt$x & x < pnt$x + grid_space) &
-#   filter(y <= pnt$y & y < pnt$y + grid_space)
+# is disjoint ?? (if yes, create new id in class and cluster ids)
+
+stn_classify = apply(hclusters %>% select(-k, -h), 1,
+                      classify_with_kknn,
+                      coords = coords,
+                      points_classify = coords %>% select(x, y),
+                      knn_value = knn_value)
+
+# check low prob ?? (if yes, keep old ids, but create new ids for fitting)
+
+# check high prob ?? (if yes, keep old ids, but create new ids for fitting)

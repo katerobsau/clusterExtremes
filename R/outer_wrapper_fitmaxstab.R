@@ -14,8 +14,7 @@
 #' weight is set to zero in fitting otherwise (default is 10)
 #' @param min_pairs set a minimum number of pairs needed for fitting (default is 10)
 #' @param fit_subsample repeat fitting for sub samples of stations (default is FALSE)
-#' @param sample_type type of samples to take, see get_samples() for documentation,
-#' and addition parameters that need to be specified (Default is NULL, for no subsamples)
+#' @param fit_sample WRITE SOMETHING INTELLIGENT
 #'
 #' @return Returns a list of fitted max-stable models
 #' @export
@@ -32,25 +31,39 @@
 #'                   cov11 = 1, cov12 = 0, cov22 = 1)
 #' sim_data <- data.frame(sim_data)
 #' names(sim_data) <- id
-#' fitM = outer_wrapper_fitmaxstab(fit_info = fit_info, obs_data = sim_data,
+#'
+#' fitM = outer_wrapper_fitmaxstab(fit_info = fit_info,
+#'                 obs_data = sim_data,
 #'                 cov_mod = "gauss")
+#'
+#' start_list = list(cov11=1, cov12 = 0, cov22 = 1)
+#' fitM_start = outer_wrapper_fitmaxstab(fit_info = fit_info,
+#'                 obs_data = sim_data,
+#'                 cov_mod = "gauss",
+#'                 start = start_list)
+#'
+#' fit_sample = get_samples(n = nrow(fit_info),
+#'                  sample_type = "partition",
+#'                  num_partitions = 2)
 #'
 #' eg1_model_list = outer_wrapper_fitmaxstab(fit_info = fit_info, obs_data = sim_data,
 #'                 cov_mod = "gauss", fit_subsample = TRUE,
-#'                 sample_type = "partition", num_partitions = 2)
+#'                 fit_sample = fit_sample, start = start_list)
+#'
+#' fit_sample = get_samples(n = nrow(fit_info),
+#'                  sample_type = "percentage",
+#'                  num_samples = 2, percentage = 80)
 #'
 #' eg2_model_list = outer_wrapper_fitmaxstab(fit_info = fit_info, obs_data = sim_data,
 #'                 cov_mod = "gauss", fit_subsample = TRUE,
-#'                 sample_type = "percentage", num_samples = 2, percentage = 80)
+#'                 fit_sample = fit_sample)
 #'
 outer_wrapper_fitmaxstab <- function(fit_info,
                                        obs_data, convert = FALSE,
                                        frech_bool = TRUE, cov_mod,
                                        min_common_obs = 10, min_pairs = 10,
                                        fit_subsample = FALSE,
-                                       sample_type = NULL, ...){
-
-  args <- list(...)
+                                       fit_sample = NULL, ...){
 
   ### ---------------------------------------------------------------------------
 
@@ -83,45 +96,43 @@ outer_wrapper_fitmaxstab <- function(fit_info,
 
   ### ---------------------------------------------------------------------------
 
-  ### FIT THE MAXSTABLE MODEL
-  loop_function <- function(i, fit_sample, data_fit, coord_fit, cov_mod,
-                            min_common_obs, min_pairs){
-
-    sample_stns = fit_sample[,i]
-    sample_data_fit = data_fit[ ,sample_stns]
-    sample_coord_fit = coord_fit[sample_stns, ]
-    fitM = inner_wrapper_fitmaxstab(data_fit = sample_data_fit,
-                                    coord_fit = sample_coord_fit,
-                                    cov_mod = cov_mod,
-                                    min_common_obs = min_common_obs,
-                                    min_pairs = min_pairs)
-    return(fitM)
-
-  }
-
   if(fit_subsample == FALSE){
+
     fitM = inner_wrapper_fitmaxstab(data_fit = data_fit, coord_fit = coord_fit,
                                     cov_mod = cov_mod,
                                     min_common_obs = min_common_obs,
-                                    min_pairs = min_pairs)
+                                    min_pairs = min_pairs, ...)
+
     model_list = list(fitM)
+
   }else{
-    fit_sample = switch(sample_type,
-                        "random" = get_samples(n = nrow(fit_info),
-                                               sample_type = "random",
-                                               ...),
-                        "partition" = get_samples(n = nrow(fit_info),
-                                                  sample_type = "partition",
-                                                  ...),
-                        "percentage" = get_samples(n = nrow(fit_info),
-                                                   sample_type = "percentage",
-                                                   ...))
+
     model_list =
       foreach(i = 1:ncol(fit_sample), .packages = c("clusterExtremes")) %do%
       loop_function(i, fit_sample, data_fit, coord_fit,
-                    cov_mod, min_common_obs, min_pairs)
+                    cov_mod, min_common_obs, min_pairs, ...)
   }
 
   return(model_list)
+
+}
+
+# -----------------------------------------------------------------------------
+
+### FIT THE MAXSTABLE MODEL
+loop_function <- function(i, fit_sample, data_fit, coord_fit, cov_mod,
+                          min_common_obs, min_pairs, ...){
+
+  sample_stns = fit_sample[,i]
+  sample_data_fit = data_fit[ ,sample_stns]
+  sample_coord_fit = coord_fit[sample_stns, ]
+
+  fitM = inner_wrapper_fitmaxstab(data_fit = sample_data_fit,
+                                  coord_fit = sample_coord_fit,
+                                  cov_mod = cov_mod,
+                                  min_common_obs = min_common_obs,
+                                  min_pairs = min_pairs, ...)
+
+  return(fitM)
 
 }

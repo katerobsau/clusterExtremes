@@ -9,8 +9,8 @@ Description: More about what it does (maybe more than one line)
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.0.1
-Depends: 
+RoxygenNote: 6.1.0
+Depends:
   class,
   cluster,
   dbscan,
@@ -27,3 +27,4 @@ Depends:
 	SDMTools,
 	SpatialExtremes,
 	tidyr
+Suggests: testthat
