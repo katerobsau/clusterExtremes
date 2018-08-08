@@ -22,6 +22,9 @@ assume loc, scale and shape parameters constant}
 weight is set to zero in fitting otherwise (default is 10)}
 
 \item{min_pairs}{set a minimum number of pairs needed for fitting (default is 10)}
+
+\item{start_list}{an option list of start values to initilise
+the fitmaxstab() model (default = NULL)}
 }
 \value{
 Returns a fitted maxstable model from the package SpatialExtremes,
@@ -50,7 +53,8 @@ shape.form <-~ 1
 
 # fails with the NA column of data
 m =  SpatialExtremes::fitmaxstab(sim_data, locations, "whitmat")
-m_wrapper = inner_wrapper_fitmaxstab(sim_data, locations, cov_mod = "whitmat")
+m_wrapper = inner_wrapper_fitmaxstab(data_fit = sim_data,
+                 coord_fit = locations, cov_mod = "whitmat")
 
 all(m$fitted.values == m_wrapper$fitted.values)
 

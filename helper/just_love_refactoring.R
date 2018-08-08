@@ -1,17 +1,20 @@
 ### ---------------------------------------------------------------------------
 
-point_info <- data.frame(test_coords, cluster_id = hcluster_list[[20]])
+point_info <- data.frame(test_coords, cluster_id = hcluster_list[[150]])
 names(point_info)[2:3] = c('x', 'y')
 
 cluster_plot <-  ggplot(data = point_info) +
   geom_point(aes(x=x , y = y, col = as.factor(cluster_id),
-                 shape = as.factor(cluster_id%%6)))
+                 shape = as.factor(cluster_id%%6)), size = 1, alpha = 0.75) +
+  theme(legend.position = "none")
 
 cluster_plot
+
 # library(plotly)
 # ggplotly(cluster_plot)
 
 ### ---------------------------------------------------------------------------
+
 # use_id = 5
 # var_name = "cluster_id"
 #
@@ -32,49 +35,6 @@ cluster_plot
 
 ### ---------------------------------------------------------------------------
 
-all_ids <- unique(point_info$cluster_id)
-convert = TRUE
-frech_bool = TRUE
-min_common_obs = 10
-min_pairs = 10
-cov_mod = "gauss"
-fit_subsample = TRUE
-sample_type = "percentage"
-num_samples = 25
-percentage = 75
-# num_partitions = 3
-
-num_ids = length(all_ids)
-all_models <- vector("list", num_ids)
-names(all_models) <- all_ids
-for(i in 1:num_ids){
-
-  use_id = all_ids[i]
-  fit_info = point_info %>% filter(cluster_id == use_id)
-  obs_data = test_max %>% select(fit_info$id)
-
-  if(nrow(fit_info) < 10){
-    all_models[[i]] = NA
-    next
-  }
-
-  model_list = outer_wrapper_fitmaxstab(fit_info = fit_info,
-                obs_data = obs_data, convert = convert,
-                frech_bool = frech_bool, cov_mod = cov_mod,
-                min_common_obs = min_common_obs, min_pairs = min_pairs,
-                fit_subsample = fit_subsample,
-                sample_type = sample_type,
-                percentage = percentage, num_samples = num_samples)
-                # num_partitions = num_partitions)
-
-  all_models[[i]] <- model_list
-
-}
-
-na_entries = lapply(all_models,function(l){all(is.na(l))}) %>%
-  unlist()
-
-all_models = all_models[na_entries == FALSE]
 
 # -----------------------------------------------------------------------
 
@@ -113,9 +73,12 @@ all_ellipses_df <- do.call(rbind, all_ellipses) %>%
   mutate(plot_group = paste(region_id, sim_index, sep = "_"))
 
 # plot the ellipses
-ell_plot <- cluster_plot +
-  # geom_path(data = mainland_df, aes(x = Long, y = Lat)) +
-  geom_path(data = all_ellipses_df, aes(x=x, y= y, group = plot_group))
-
+ell_plot <-
+  ggplot() +
+  # cluster_plot +
+  geom_path(data = mainland_df, aes(x = Long, y = Lat)) +
+  geom_path(data = all_ellipses_df, aes(x=x, y= y, group = plot_group), alpha = 0.05) +
+  scale_x_continuous(limits = c(135,155)) +
+  scale_y_continuous(limits = c(-40,-20))
 ell_plot
 

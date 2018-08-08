@@ -61,5 +61,6 @@ eg1_model_list = outer_wrapper_fitmaxstab(fit_info = fit_info, obs_data = sim_da
 
 eg2_model_list = outer_wrapper_fitmaxstab(fit_info = fit_info, obs_data = sim_data,
                 cov_mod = "gauss", fit_subsample = TRUE,
-                sample_type = "percentage", num_samples = 2, percentage = 0.8)
+                sample_type = "percentage", num_samples = 2, percentage = 80)
+
 }

@@ -259,13 +259,15 @@ cluster_plot
 
 ## Clustering
 cluster_method = "Hierarchical"
-linkage_method = "average"
-k = 10
+linkage_method = "ward.D2"
+k = 6
 hcluster_list = vector("list", 4)
+# ggdendro_list = vector("list", 4)
 for(i in 1:4){
   hclusters = hclust(DD_list[[i]], method = linkage_method)
-  # plot(hclusters)
-  hcluster_list[[i]] = cutree(hclusters, h = 0.15) #k = k)
+  # ggdendro_list[[i]] = ggdendrogram(hclusters, rotate = FALSE, leaf_labels = FALSE) +
+  #   scale_y_continuous(limits = c(0.05, 0.16))
+  hcluster_list[[i]] = cutree(hclusters, k = k)
 }
 
 # --------------------------------------------------------

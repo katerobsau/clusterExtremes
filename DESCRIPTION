@@ -18,6 +18,7 @@ Depends:
 	dplyr,
 	extRemes,
 	ggplot2,
+	kknn,
 	magrittr,
 	oz,
 	parallel,
