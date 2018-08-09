@@ -1,12 +1,18 @@
 # Create a plot
-plot_kknn <- function(hclusters, grid_classify, num_k){
+plot_kknn <- function(hclusters, grid_classify, num_k, cut_h){
 
-  cluster_ids <- hclusters %>% filter(k == num_k) %>% select(-k, -h)
-
+  if(missing(cut_h)){
+    cluster_ids <- hclusters %>% filter(k == num_k) %>% select(-k, -h)
+    grid_plot <- grid_classify %>% filter(k == num_k)
+  }
+  if(missing(num_k)){
+    cluster_ids <- hclusters %>% filter(h == cut_h) %>% select(-k, -h)
+    grid_plot <- grid_classify %>% filter(h == cut_h)
+  }
   mainland_df <- utils_mainland()
   tas_df <- utils_tasmania()
   kknn_plot <- ggplot() +
-    geom_raster(data = grid_classify %>% filter(k == num_k),
+    geom_raster(data = grid_plot,
                 aes(x=x, y=y,
                     fill = as.factor(class_id),
                     alpha = prob_summary)) +

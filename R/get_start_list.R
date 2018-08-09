@@ -4,10 +4,12 @@
 #'
 #' @param model_list a list containing max-stable models
 #' @param frech_bool (default = TRUE) are the marginals standard frechet
+#'
 #' @return returns a list of starting values for fitmaxstab()
 #' @export
 #'
 #' @examples
+#'
 get_start_list <- function(model_list, frech_bool = TRUE){
 
   cov11 = lapply(model_list, utils_get_par_fun, i = 1) %>% unlist()

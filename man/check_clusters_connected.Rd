@@ -4,20 +4,12 @@
 \alias{check_clusters_connected}
 \title{Check if a regions is connected}
 \usage{
-check_clusters_connected(coords, medoid, grid, medoid_ref = TRUE)
+check_clusters_connected(coords, grid)
 }
 \arguments{
-\item{coords}{data frame with columns x, y and class_id
-class_id takes boolean values of 0 and 1}
-
-\item{medoid}{index of the medoid in the coords data frame}
+\item{coords}{data frame with columns x, y and class_id}
 
 \item{grid}{a data frame that describes a grid, columns of x, y and class_id}
-
-\item{medoid_ref}{if the connection should be relative to the location of a
-a representative object, such as a medoid}
-
-\item{grid_space}{spacing of the grid, equal in x and y}
 }
 \value{
 Returns the a data frame with columns block, which is the year, and p_value.
@@ -37,61 +29,37 @@ those we are interested in to 1.
 \examples{
 
 coords = data.frame(x = runif(100)*10, y = runif(100)*10)
-class_id = rep(1, nrow(coords))
 coords = coords \%>\%
-  mutate(class_id = class_id) \%>\%
+  mutate(class_id = 1) \%>\%
   mutate(class_id = ifelse(x <= 3 & y <= 3, 0, class_id)) \%>\%
   mutate(class_id = ifelse(x >= 8 & y >= 2, 0, class_id))
 
-medoid_coords = data.frame(x = 0.5, y = 0.5, class_id = 0)
-coords = rbind(coords, medoid_coords)
-medoid = nrow(coords)
-
 coord_plot <-ggplot() +
   geom_point(data = coords, aes(x = x, y= y,
-                                col = as.factor(class_id))) +
-  geom_point(data = medoid_coords, aes(x=x, y =y))
-
+                                col = as.factor(class_id)))
 coord_plot
 
 grid_space = 1
 x_range = range(coords[,1])
 y_range = range(coords[,2])
 grid = expand.grid(x = seq(x_range[1], x_range[2], by = grid_space),
-                   y = seq(y_range[1], y_range[2], by = grid_space))
+                   y = seq(y_range[1], y_range[2], by = grid_space)) \%>\%
+       as.data.frame() \%>\%
+       mutate(class_id = 1) \%>\%
+       mutate(class_id = ifelse(x <= 3 & y <= 3, 0, class_id)) \%>\%
+       mutate(class_id = ifelse(x >= 8 & y >= 2, 0, class_id))
 
-training_set = coords \%>\% select(x,y) \%>\% as.matrix()
-labels = coords \%>\% select(class_id) \%>\% unlist()
-knn_classification = knn(train = training_set,
-                         test = grid,
-                         cl = labels,
-                         k = 1)
-
-grid = mutate(grid, class_id = knn_classification)
-
-grid_plot <-ggplot() +
-  geom_point(data = coords, aes(x = x, y= y,
+grid_plot <-ggplot(aes(x = x, y = y,
                                 col = as.factor(class_id))) +
-  geom_point(data = grid, aes(x = x, y = y,
-                              col = as.factor(class_id)),
-             shape = 3) +
-  geom_point(data = medoid_coords, aes(x=x, y =y))
-
+  geom_point(data = coords) +
+  geom_point(data = grid, shape = 3)
 grid_plot
 
-connected = check_clusters_connected(coords, medoid, grid)
+connected = check_clusters_connected(coords, grid)
 
 connected_plot <- ggplot(data = coords, aes(x = x, y = y)) +
   geom_point(aes(col = as.factor(connected)))
 
 connected_plot
 
-connected1 = check_clusters_connected(coords = coords,
-                      grid = grid, medoid_ref = FALSE)
-
-connected1_plot <- ggplot(data = coords, aes(x = x, y = y)) +
-  geom_point(aes(col = as.factor(connected1)))
-
-connected1_plot
-print("Should write code to change medoid to representative index")
 }

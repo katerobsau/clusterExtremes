@@ -6,7 +6,7 @@
 \usage{
 outer_wrapper_fitmaxstab(fit_info, obs_data, convert = FALSE,
   frech_bool = TRUE, cov_mod, min_common_obs = 10, min_pairs = 10,
-  fit_subsample = FALSE, sample_type = NULL, ...)
+  sample_bool = FALSE, fit_sample = NULL, ...)
 }
 \arguments{
 \item{fit_info}{a data frame which must have columns id, x, y}
@@ -29,10 +29,10 @@ weight is set to zero in fitting otherwise (default is 10)}
 
 \item{min_pairs}{set a minimum number of pairs needed for fitting (default is 10)}
 
-\item{fit_subsample}{repeat fitting for sub samples of stations (default is FALSE)}
+\item{sample_bool}{repeat fitting for samples of stations (default is FALSE)}
 
-\item{sample_type}{type of samples to take, see get_samples() for documentation,
-and addition parameters that need to be specified (Default is NULL, for no subsamples)}
+\item{fit_sample}{a matrix for columns for the different samples to fit,
+the rows are the indexes of stations from fit_info to sample}
 }
 \value{
 Returns a list of fitted max-stable models
@@ -52,15 +52,31 @@ sim_data <- SpatialExtremes::rmaxstab(100, locations, cov.mod = "gauss",
                   cov11 = 1, cov12 = 0, cov22 = 1)
 sim_data <- data.frame(sim_data)
 names(sim_data) <- id
-fitM = outer_wrapper_fitmaxstab(fit_info = fit_info, obs_data = sim_data,
+
+fitM = outer_wrapper_fitmaxstab(fit_info = fit_info,
+                obs_data = sim_data,
                 cov_mod = "gauss")
 
+start_list = list(cov11=1, cov12 = 0, cov22 = 1)
+fitM_start = outer_wrapper_fitmaxstab(fit_info = fit_info,
+                obs_data = sim_data,
+                cov_mod = "gauss",
+                start = start_list)
+
+fit_sample = get_samples(n = nrow(fit_info),
+                 sample_type = "partition",
+                 num_partitions = 2)
+
 eg1_model_list = outer_wrapper_fitmaxstab(fit_info = fit_info, obs_data = sim_data,
-                cov_mod = "gauss", fit_subsample = TRUE,
-                sample_type = "partition", num_partitions = 2)
+                cov_mod = "gauss", sample_bool = TRUE,
+                fit_sample = fit_sample, start = start_list)
+
+fit_sample = get_samples(n = nrow(fit_info),
+                 sample_type = "percentage",
+                 num_samples = 2, percentage = 80)
 
 eg2_model_list = outer_wrapper_fitmaxstab(fit_info = fit_info, obs_data = sim_data,
-                cov_mod = "gauss", fit_subsample = TRUE,
-                sample_type = "percentage", num_samples = 2, percentage = 80)
+                cov_mod = "gauss", sample_bool = TRUE,
+                fit_sample = fit_sample)
 
 }

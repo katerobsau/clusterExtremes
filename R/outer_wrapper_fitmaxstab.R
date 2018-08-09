@@ -13,8 +13,9 @@
 #' @param min_common_obs minimum number of common pairwise observations,
 #' weight is set to zero in fitting otherwise (default is 10)
 #' @param min_pairs set a minimum number of pairs needed for fitting (default is 10)
-#' @param fit_subsample repeat fitting for sub samples of stations (default is FALSE)
-#' @param fit_sample WRITE SOMETHING INTELLIGENT
+#' @param sample_bool repeat fitting for samples of stations (default is FALSE)
+#' @param fit_sample a matrix for columns for the different samples to fit,
+#' the rows are the indexes of stations from fit_info to sample
 #'
 #' @return Returns a list of fitted max-stable models
 #' @export
@@ -47,7 +48,7 @@
 #'                  num_partitions = 2)
 #'
 #' eg1_model_list = outer_wrapper_fitmaxstab(fit_info = fit_info, obs_data = sim_data,
-#'                 cov_mod = "gauss", fit_subsample = TRUE,
+#'                 cov_mod = "gauss", sample_bool = TRUE,
 #'                 fit_sample = fit_sample, start = start_list)
 #'
 #' fit_sample = get_samples(n = nrow(fit_info),
@@ -55,14 +56,14 @@
 #'                  num_samples = 2, percentage = 80)
 #'
 #' eg2_model_list = outer_wrapper_fitmaxstab(fit_info = fit_info, obs_data = sim_data,
-#'                 cov_mod = "gauss", fit_subsample = TRUE,
+#'                 cov_mod = "gauss", sample_bool = TRUE,
 #'                 fit_sample = fit_sample)
 #'
 outer_wrapper_fitmaxstab <- function(fit_info,
                                        obs_data, convert = FALSE,
                                        frech_bool = TRUE, cov_mod,
                                        min_common_obs = 10, min_pairs = 10,
-                                       fit_subsample = FALSE,
+                                       sample_bool = FALSE,
                                        fit_sample = NULL, ...){
 
   ### ---------------------------------------------------------------------------
@@ -96,7 +97,7 @@ outer_wrapper_fitmaxstab <- function(fit_info,
 
   ### ---------------------------------------------------------------------------
 
-  if(fit_subsample == FALSE){
+  if(sample_bool == FALSE){
 
     fitM = inner_wrapper_fitmaxstab(data_fit = data_fit, coord_fit = coord_fit,
                                     cov_mod = cov_mod,

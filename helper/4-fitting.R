@@ -1,12 +1,10 @@
-### remove for loop overa all_models!!! (bad)
-
 ### Fitting
 print("Warning: passing point_info in at the moment")
 print("Need to couple this piece of code, with a proper subset")
 
 all_ids <- 1:num_k
-all_models <- vector("list", num_k)
-names(all_models) <- all_ids
+model_list_by_cluster <- vector("list", num_k)
+names(model_list_by_cluster) <- all_ids
 
 cluster_ids <- hclusters %>%
   filter(k == num_k) %>%
@@ -25,9 +23,14 @@ for(i in 1:num_k){
   obs_data = max_data %>% select(fit_info$id)
 
   if(nrow(fit_info) < min_stns_for_fitting){
-    all_models[[i]] = NA
+    model_list_by_cluster[[i]] = NA
     next
   }
+
+  set.seed(seed_value)
+  fit_sample = get_samples(n = nrow(fit_info), sample_type = sample_type,
+                            percentage = percentage,
+                            num_samples = num_samples)
 
   model_list = outer_wrapper_fitmaxstab(fit_info = fit_info,
                                         obs_data = obs_data,
@@ -36,17 +39,15 @@ for(i in 1:num_k){
                                         cov_mod = cov_mod,
                                         min_common_obs = min_common_obs,
                                         min_pairs = min_pairs,
-                                        fit_subsample = fit_subsample,
-                                        sample_type = sample_type,
-                                        percentage = percentage,
-                                        num_samples = num_samples)
+                                        sample_bool = sample_bool,
+                                        fit_sample = fit_sample)
 
-  all_models[[i]] <- model_list
+  model_list_by_cluster[[i]] <- model_list
 
 }
 
 # Remove the clusters with too few observations for fitting
-na_entries = lapply(all_models,function(l){all(is.na(l))}) %>%
+na_entries = lapply(model_list_by_cluster,function(l){all(is.na(l))}) %>%
   unlist()
 
-all_models = all_models[na_entries == FALSE]
+model_list_by_cluster = model_list_by_cluster[na_entries == FALSE]

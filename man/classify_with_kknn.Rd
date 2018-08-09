@@ -4,12 +4,14 @@
 \alias{classify_with_kknn}
 \title{Classify a grid using weighted k nearest neighbours}
 \usage{
-classify_with_kknn(points_train, points_classify, knn_value,
+classify_with_kknn(coords, cluster_ids, points_classify, knn_value,
   kernel = "inv", distance = 2)
 }
 \arguments{
-\item{points_train}{a data frame of coordinates with columns
-labelled x and y and a cluster_id
+\item{coords}{a data frame of coordinates with columns
+labelled x and y}
+
+\item{cluster_ids}{the cluster_ids corresponding to the coords
 the forumula for classification, is cluster_id ~ x + y + xy}
 
 \item{points_classify}{a data frame of coordinates for classification,
@@ -40,10 +42,11 @@ coords <-data.frame(x = runif(n.site, 0, 10), y = runif(n.site, 0, 10))
 grid_domain = get_grid_for_classification(coords = coords,
      restrict_aus = FALSE)
 
-coords$cluster_id = 1
-coords$cluster_id[coords$x < 4] = 2
+cluster_ids = rep(1, nrow(coords))
+cluster_ids[coords$x < 4] = 2
 
-grid_output = classify_with_kknn(points_train = coords,
+grid_output = classify_with_kknn(coords = coords,
+       cluster_ids = cluster_ids
        points_classify = grid_domain,
  knn_value = 3)
 

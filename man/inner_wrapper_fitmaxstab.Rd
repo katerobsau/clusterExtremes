@@ -5,7 +5,7 @@
 \title{Fit a max-stable model}
 \usage{
 inner_wrapper_fitmaxstab(data_fit, coord_fit, cov_mod = "gauss",
-  frech_bool = TRUE, min_common_obs = 10, min_pairs = 10)
+  frech_bool = TRUE, min_common_obs = 10, min_pairs = 10, ...)
 }
 \arguments{
 \item{data_fit}{dataframe or matrix with rows of observations, and columns referencing locations.}
@@ -47,15 +47,16 @@ sim_data <- SpatialExtremes::rmaxstab(40, locations, cov.mod = "whitmat",
                  nugget = 0, range = 3, smooth = 0.5)
 
 ##Fit a max-stable process using the Schlather's model
-loc.form <-~ 1
-scale.form <-~ 1
-shape.form <-~ 1
-
-# fails with the NA column of data
 m =  SpatialExtremes::fitmaxstab(sim_data, locations, "whitmat")
 m_wrapper = inner_wrapper_fitmaxstab(data_fit = sim_data,
                  coord_fit = locations, cov_mod = "whitmat")
-
 all(m$fitted.values == m_wrapper$fitted.values)
+
+## Pass a start value
+start_list = as.list(m$fitted.values)
+
+m_start = inner_wrapper_fitmaxstab(data_fit = sim_data,
+                 coord_fit = locations, cov_mod = "whitmat",
+                 start = start_list)
 
 }

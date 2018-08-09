@@ -1,19 +1,19 @@
-### remove for loop over all_models!!! (bad)
+### remove for loop over model_list_by_cluster!!! (bad)
 
 ### Plot Ellipses
-num_clusters = length(all_models)
+num_clusters = length(model_list_by_cluster)
 all_ellipses <- vector("list", num_clusters)
-names(all_ellipses) = names(all_models)
+names(all_ellipses) = names(model_list_by_cluster)
 medoids = data.frame(x = NULL, y = NULL, region_id = NULL)
 for(i in 1:num_clusters){
 
-  region_id = names(all_models)[[i]]
+  region_id = names(model_list_by_cluster)[[i]]
 
-  ells <- lapply(all_models[[i]], utils_get_ellipse)
+  ells <- lapply(model_list_by_cluster[[i]], utils_get_ellipse)
   rep_val = lapply(ells, nrow) %>% unlist()
   ells <- do.call(rbind, ells) %>%
     as.data.frame() %>%
-    mutate(sim_index = rep(1:length(all_models[[i]]), times = rep_val)) %>%
+    mutate(sim_index = rep(1:length(model_list_by_cluster[[i]]), times = rep_val)) %>%
     mutate(region_id = region_id)
 
   # shift ellipse by the medoiod

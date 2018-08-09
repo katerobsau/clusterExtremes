@@ -55,6 +55,7 @@ inner_wrapper_fitmaxstab <- function(data_fit, coord_fit, cov_mod = "gauss",
   pair_weights = get_pair_weights(data_fit, min_common_obs)
   if(sum(pair_weights) < min_pairs){
     warning("Warning: too few common pairs for fitting, reduce sample size")
+    return(NA)
   }
 
   fitM <- tryCatch({
