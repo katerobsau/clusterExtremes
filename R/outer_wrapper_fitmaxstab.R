@@ -12,7 +12,7 @@
 #' max-stable representation. See SpatialExtremes::fitmaxstab() documentation.
 #' @param min_common_obs minimum number of common pairwise observations,
 #' weight is set to zero in fitting otherwise (default is 10)
-#' @param min_pairs set a minimum number of pairs needed for fitting (default is 10)
+#' @param min_pairs set a minimum number of pairs needed for fitting (default is choose(10,2))
 #' @param sample_bool repeat fitting for samples of stations (default is FALSE)
 #' @param fit_sample a matrix for columns for the different samples to fit,
 #' the rows are the indexes of stations from fit_info to sample
@@ -62,7 +62,7 @@
 outer_wrapper_fitmaxstab <- function(fit_info,
                                        obs_data, convert = FALSE,
                                        frech_bool = TRUE, cov_mod,
-                                       min_common_obs = 10, min_pairs = 10,
+                                       min_common_obs = 10, min_pairs = choose(10,2),
                                        sample_bool = FALSE,
                                        fit_sample = NULL, ...){
 
