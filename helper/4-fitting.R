@@ -28,9 +28,18 @@ for(i in 1:num_k){
   }
 
   set.seed(seed_value)
-  fit_sample = get_samples(n = nrow(fit_info), sample_type = sample_type,
-                            percentage = percentage,
-                            num_samples = num_samples)
+  fit_sample = switch(sample_type,
+                      "random" = get_samples(n = nrow(fit_info),
+                                             sample_type = sample_type,
+                                             num_samples = num_samples,
+                                             samp_size = samp_size),
+                      "parition" = get_samples(n = nrow(fit_info),
+                                               sample_type = sample_type,
+                                               num_partitions = num_partitions),
+                      "percentage" = get_samples(n = nrow(fit_info),
+                                             sample_type = sample_type,
+                                             num_samples = num_samples,
+                                             percentage = percentage))
 
   model_list = outer_wrapper_fitmaxstab(fit_info = fit_info,
                                         obs_data = obs_data,

@@ -36,7 +36,7 @@ min_cut_height = 0.1
 #  # grid specifics
 grid_space = 0.05
 min_dist = 0.3
-# restrict_aus = TRUE
+restrict_aus = TRUE
   # number of neighbours
 knn_value = 15
 
@@ -56,17 +56,18 @@ min_stns_for_fitting = 10
 
  # sample parameters
 seed_value = 1
-sample_type = "percentage"
+sample_type = "random"
 num_samples = 20
-percentage = 90
+samp_size = 25
+# percentage = 2/3*100
 
   #fitting parameters
 convert = TRUE
 frech_bool = TRUE
 min_common_obs = 10
-min_pairs = 10
+min_pairs = choose(min_stns_for_fitting, 2)
 cov_mod = "gauss"
-sample_bool = FALSE #TRUE
+sample_bool = TRUE
 
 # num_partitions = 3
 

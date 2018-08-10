@@ -27,23 +27,50 @@ get_samples <- function(n, sample_type, num_samples = 1, samp_size = NULL,
   if(!(sample_type %in% c("random", "partition", "percentage")))
     stop("sample_type incorrectly specified, must be either random or partition")
 
-  if(sample_type == "random")
+  if(sample_type == "random"){
+
+    if(samp_size >= n){
+      warning("samp_size must not be greater than n, changing to a jackknife")
+      samp_size = n - 1
+    }
+
+    if(num_samples > choose(n,samp_size)){
+      warning("not enough data for that num_samples, changing num_samples to n - 1")
+      num_samples = n - 1
+    }
+
     samples = replicate(num_samples, sample(1:n, samp_size, replace = FALSE))
 
+  }
+
   if(sample_type == "partition"){
+
+    if(num_partitions >= n)
+      stop("Too many partitions requested")
+
     ord = sample(1:n , n, replace = FALSE)
     num_rows = floor(n/num_partitions)
     ord = ord[1:(num_partitions*num_rows)]
     samples = matrix(ord, num_rows, num_partitions)
+
   }
 
   if(sample_type == "percentage"){
+
     if(percentage > 100 | percentage < 0)
       stop("Percentage value supplied must be greater than 0 and less than 100")
+
     samp_size = floor(n*percentage/100)
     if(samp_size < 1)
       stop("Percentage supplied produced samp_size less than 1")
+
+    if(num_samples > choose(n, samp_size)){
+      warning("not enough data for that num_samples, changing num_samples to n - 1")
+      num_samples = n - 1
+    }
+
     samples = replicate(num_samples, sample(1:n, samp_size, replace = FALSE))
+
   }
 
   return(samples)

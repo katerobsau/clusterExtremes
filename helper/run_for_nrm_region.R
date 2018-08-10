@@ -38,13 +38,30 @@ clust_dist <- get_dist(x = max_data,
                        coords = coords %>% select(-id),
                        min_common_years = min_common_years,
                        max_euclid = max_euclid)
+# Plot points
+coord_plot <- ggplot() +
+  geom_path(data = region_info, aes(x=long, y=lat)) +
+  geom_point(data = coords, aes(x=x, y=y))
+
+coord_plot
 
 # -----------------------------------------------------------------------------
+
+linkage_method = "ward.D2"
 
 # Cluster
 source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/1-cluster.R")
 plot(full_tree)
-abline(h = min_cut_height, col ="red", lty= "dashed")
+abline(h = min_cut_height, col ="red", lty = "dashed")
+
+cut_h = 0.32
+abline(h = cut_h, col ="red", lty = "dashed")
+cut_heights = data.frame(h = full_tree$height, k = (nrow(coords)-1):1)
+
+num_k = cut_heights %>%
+  filter(h > cut_h) %>%
+  select(k) %>%
+  max() + 1
 
 # -----------------------------------------------------------------------------
 
@@ -52,8 +69,9 @@ abline(h = min_cut_height, col ="red", lty= "dashed")
 source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/2-classify.R")
 source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/plot_kknn.R")
 
-cut_h = 0.15 # num_k = 40
-classify_plot = plot_kknn(hclusters, grid_classify, num_k)
+classify_plot = plot_kknn(hclusters = hclusters,
+                          grid_classify = grid_classify,
+                          num_k = num_k)
 classify_plot
 
 # -----------------------------------------------------------------------------
@@ -69,18 +87,21 @@ source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/4-fitting.R")
 
 # -----------------------------------------------------------------------------
 
-# # Check fits
-# source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/5-check_fits.R")
-#
-# # -----------------------------------------------------------------------------
-#
-# # Repeat fits
-# source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/6-repeat_fits.R")
+# Check fits
+source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/5-check_fits.R")
+
+# -----------------------------------------------------------------------------
+
+# Repeat fits
+source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/6-repeat_fits.R")
 
 # -----------------------------------------------------------------------------
 
 # Ellipse
 source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/7-ellipses.R")
 source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/plot_ellipses.R")
-ell_plot = plot_ellipses(base_plot = classify_plot, all_ellipses_df,alpha =1)
+# base_plot <- classify_plot
+tas_df <- utils_tasmania()
+base_plot <- ggplot() + geom_path(data = tas_df, aes(x= Long, y = Lat))
+ell_plot = plot_ellipses(base_plot = base_plot, all_ellipses_df, alpha = 0.25)
 ell_plot

@@ -1,14 +1,19 @@
 # Create a plot
-plot_kknn <- function(hclusters, grid_classify, num_k, cut_h){
+plot_kknn <- function(hclusters, grid_classify, num_k = NULL, cut_h = NULL){
 
-  if(missing(cut_h)){
+  if(!is.null(num_k)){
     cluster_ids <- hclusters %>% filter(k == num_k) %>% select(-k, -h)
     grid_plot <- grid_classify %>% filter(k == num_k)
   }
-  if(missing(num_k)){
+
+  if(!is.null(cut_h)){
     cluster_ids <- hclusters %>% filter(h == cut_h) %>% select(-k, -h)
     grid_plot <- grid_classify %>% filter(h == cut_h)
+    num_k = length(unique(cluster_ids))
   }
+
+  print(num_k)
+
   mainland_df <- utils_mainland()
   tas_df <- utils_tasmania()
   kknn_plot <- ggplot() +
@@ -28,7 +33,7 @@ plot_kknn <- function(hclusters, grid_classify, num_k, cut_h){
     xlab("Longitude") +
     ylab("Latitude") +
     theme_bw() #+
-  # theme(legend.position = "none")
+    # theme(legend.position = "none")
 
   return(kknn_plot)
 }

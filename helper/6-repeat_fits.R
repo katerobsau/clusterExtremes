@@ -20,9 +20,18 @@ for(i in 1:len){
   }
 
   set.seed(seed_value)
-  fit_sample = get_samples(n = nrow(fit_info), sample_type = sample_type,
-                           percentage = percentage,
-                           num_samples = num_samples)
+  fit_sample = switch(sample_type,
+                      "random" = get_samples(n = nrow(fit_info),
+                                             sample_type = sample_type,
+                                             num_samples = num_samples,
+                                             samp_size = samp_size),
+                      "parition" = get_samples(n = nrow(fit_info),
+                                               sample_type = sample_type,
+                                               num_partitions = num_partitions),
+                      "percentage" = get_samples(n = nrow(fit_info),
+                                                 sample_type = sample_type,
+                                                 num_samples = num_samples,
+                                                 percentage = percentage))
 
   start_list = get_start_list(model_list)
 
@@ -46,3 +55,4 @@ na_entries = lapply(model_list_by_cluster,function(l){all(is.na(l))}) %>%
   unlist()
 
 model_list_by_cluster = model_list_by_cluster[na_entries == FALSE]
+

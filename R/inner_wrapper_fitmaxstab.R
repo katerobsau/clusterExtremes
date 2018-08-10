@@ -11,7 +11,7 @@
 #' assume loc, scale and shape parameters constant
 #' @param min_common_obs minimum number of common pairwise observations,
 #' weight is set to zero in fitting otherwise (default is 10)
-#' @param min_pairs set a minimum number of pairs needed for fitting (default is 10)
+#' @param min_pairs set a minimum number of pairs needed for fitting (default is choose(10,2))
 #' @param start_list an option list of start values to initilise
 #' the fitmaxstab() model (default = NULL)
 
@@ -47,7 +47,7 @@
 #'
 inner_wrapper_fitmaxstab <- function(data_fit, coord_fit, cov_mod = "gauss",
                                      frech_bool = TRUE, min_common_obs = 10,
-                                     min_pairs = 10, ...){
+                                     min_pairs = choose(10,2), ...){
 
   data_fit = as.matrix(data_fit)
   coord_fit = as.matrix(coord_fit)

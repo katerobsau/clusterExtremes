@@ -5,7 +5,8 @@
 \title{Fit a max-stable model}
 \usage{
 inner_wrapper_fitmaxstab(data_fit, coord_fit, cov_mod = "gauss",
-  frech_bool = TRUE, min_common_obs = 10, min_pairs = 10, ...)
+  frech_bool = TRUE, min_common_obs = 10, min_pairs = choose(10, 2),
+  ...)
 }
 \arguments{
 \item{data_fit}{dataframe or matrix with rows of observations, and columns referencing locations.}
@@ -21,7 +22,7 @@ assume loc, scale and shape parameters constant}
 \item{min_common_obs}{minimum number of common pairwise observations,
 weight is set to zero in fitting otherwise (default is 10)}
 
-\item{min_pairs}{set a minimum number of pairs needed for fitting (default is 10)}
+\item{min_pairs}{set a minimum number of pairs needed for fitting (default is choose(10,2))}
 
 \item{start_list}{an option list of start values to initilise
 the fitmaxstab() model (default = NULL)}

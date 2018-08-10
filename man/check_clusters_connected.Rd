@@ -28,11 +28,13 @@ those we are interested in to 1.
 }
 \examples{
 
+library(dplyr)
+library(ggplot2)
 coords = data.frame(x = runif(100)*10, y = runif(100)*10)
 coords = coords \%>\%
-  mutate(class_id = 1) \%>\%
-  mutate(class_id = ifelse(x <= 3 & y <= 3, 0, class_id)) \%>\%
-  mutate(class_id = ifelse(x >= 8 & y >= 2, 0, class_id))
+  dplyr::mutate(class_id = 1) \%>\%
+  dplyr::mutate(class_id = ifelse(x <= 3 & y <= 3, 0, class_id)) \%>\%
+  dplyr::mutate(class_id = ifelse(x >= 8 & y >= 2, 0, class_id))
 
 coord_plot <-ggplot() +
   geom_point(data = coords, aes(x = x, y= y,
@@ -45,17 +47,16 @@ y_range = range(coords[,2])
 grid = expand.grid(x = seq(x_range[1], x_range[2], by = grid_space),
                    y = seq(y_range[1], y_range[2], by = grid_space)) \%>\%
        as.data.frame() \%>\%
-       mutate(class_id = 1) \%>\%
-       mutate(class_id = ifelse(x <= 3 & y <= 3, 0, class_id)) \%>\%
-       mutate(class_id = ifelse(x >= 8 & y >= 2, 0, class_id))
+       dplyr::mutate(class_id = 1) \%>\%
+       dplyr::mutate(class_id = ifelse(x <= 3 & y <= 3, 0, class_id)) \%>\%
+       dplyr::mutate(class_id = ifelse(x >= 8 & y >= 2, 0, class_id))
 
-grid_plot <-ggplot(aes(x = x, y = y,
-                                col = as.factor(class_id))) +
-  geom_point(data = coords) +
-  geom_point(data = grid, shape = 3)
+grid_plot <- coord_plot +
+  geom_point(data = grid,
+      aes(x = x, y = y, col = as.factor(class_id)), shape = 3)
 grid_plot
 
-connected = check_clusters_connected(coords, grid)
+connected = check_clusters_connected(coords = coords, grid = grid)
 
 connected_plot <- ggplot(data = coords, aes(x = x, y = y)) +
   geom_point(aes(col = as.factor(connected)))

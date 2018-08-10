@@ -17,3 +17,6 @@ returns a list of starting values for fitmaxstab()
 \description{
 Takes a list of models, and finds a set of starting values
 }
+\examples{
+
+}
