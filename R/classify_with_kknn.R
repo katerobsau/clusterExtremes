@@ -10,7 +10,7 @@
 #' @param points_classify a data frame of coordinates for classification,
 #' with columns labelled x and y
 #' @param knn_value the numbere of k nearest neighbours to consider
-#' @param kernel the type of kernel used in kknn(), see documentation.
+#' @param kernel_type the type of kernel used in kknn(), see documentation.
 #' Default is "inv" for inverse distance weighted
 #' @param distance parameter associated with the minokowski distance,
 #' we use a default of 2 for euclidean
@@ -48,7 +48,7 @@ classify_with_kknn <- function(coords,
                                cluster_ids,
                                points_classify,
                                knn_value,
-                               kernel = "inv",
+                               kernel_type = "inv",
                                distance = 2){
 
   if(length(cluster_ids) != nrow(coords))
@@ -61,7 +61,7 @@ classify_with_kknn <- function(coords,
 
   results_kknn <- kknn::kknn(cluster_id ~ ., train = set_learn,
                   test = points_classify, distance = distance,
-                  kernel = "inv", k = knn_value)
+                  kernel = kernel_type, k = knn_value)
   results_fit <- fitted(results_kknn)
   points_classify$class_id = results_fit
 

@@ -1,25 +1,33 @@
 ### Get regionalisation
-grid_domain = get_grid_for_classification(coords = coords %>% select(x, y),
-                                          grid_space = grid_space,
-                                          min_dist = min_dist,
-                                          restrict_aus = restrict_aus)
-#
-# # Create grid for classification
-# long = range(coords$x) + c(-grid_space, grid_space)
-# lat  = range(coords$y) + c(-grid_space, grid_space)
-# long.seq = seq(min(long), max(long), by = grid_space)
-# lat.seq = seq(min(lat), max(lat), by = grid_space)
-# full_grid = expand.grid(x = long.seq, y = lat.seq)
-#
-# bool_pip = pnt.in.poly(full_grid,
-#                        region_info %>% select(long, lat))$pip
-# grid_domain = full_grid[bool_pip == TRUE, ]s
 
-grid_classify = apply(hclusters %>% select(-k, -h), 1,
-                      classify_with_kknn,
-                      coords = coords,
-                      points_classify = grid_domain,
-                      knn_value = knn_value)
+# Create grid for classification
+full_grid = generate_grid(coords = coords, grid_space = grid_space)
+print("Generated the grid")
+
+# Reduce points (fast)
+near_grid = utils_reduce_grid(coords = coords, full_grid = full_grid, min_dist = min_dist)
+print("Restricted the grid to be nearby points")
+
+# Check within australia (bit slow ~ 1 minute)
+grid_domain = utils_restrict_to_aus(near_grid = near_grid)
+print("Restricted the grid to within Australia")
+
+# Get classificaiton for grid
+cluster_ids_mat <- hclusters %>% select(-k, -h) %>% as.matrix()
+cl <- makeCluster(detectCores())
+registerDoParallel(cl)
+# grid_classify = apply(hclusters %>% select(-k, -h), 1,
+#                       classify_with_kknn,
+#                       coords = coords,
+#                       points_classify = grid_domain,
+#                       knn_value = knn_value)
+grid_classify <- foreach(i = 1:nrow(cluster_ids_mat),
+                         .packages = c("clusterExtremes")) %dopar%
+ classify_with_kknn(coords = coords,
+                   cluster_ids =cluster_ids_mat[i,],
+                   points_classify = grid_domain,
+                   knn_value = knn_value)
+stopCluster(cl)
 
 rep_k <- rep(hclusters$k, each = nrow(grid_domain))
 rep_h <- rep(hclusters$h, each = nrow(grid_domain))
