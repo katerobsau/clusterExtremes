@@ -1,5 +1,5 @@
 # Create a plot
-plot_kknn <- function(hclusters, grid_classify, num_k = NULL, cut_h = NULL){
+plot_kknn <- function(hclusters, grid_classify, num_k = NULL, cut_h = NULL, show_legend = FALSE){
 
   if(!is.null(num_k)){
     cluster_ids <- hclusters %>% filter(k == num_k) %>% select(-k, -h)
@@ -33,7 +33,11 @@ plot_kknn <- function(hclusters, grid_classify, num_k = NULL, cut_h = NULL){
     xlab("Longitude") +
     ylab("Latitude") +
     theme_bw() #+
-    # theme(legend.position = "none")
+
+  if(show_legend == FALSE){
+    kknn_plot <- kknn_plot +
+      theme(legend.position = "none")
+  }
 
   return(kknn_plot)
 }

@@ -27,7 +27,7 @@ max_euclid = 1
 
 # Cluster step
 cluster_method = "Hierarchical"
-linkage_method = "average"
+linkage_method = "mcquitty"
 min_cut_height = 0.1
 
 ### ---------------------------------------------------------------------------
@@ -36,7 +36,6 @@ min_cut_height = 0.1
 #  # grid specifics
 grid_space = 0.05
 min_dist = 0.3
-restrict_aus = TRUE
   # number of neighbours
 knn_value = 15
 
@@ -57,8 +56,8 @@ min_stns_for_fitting = 10
  # sample parameters
 seed_value = 1
 sample_type = "random"
-num_samples = 20
-samp_size = 25
+num_samples = 25
+samp_size = 30
 # percentage = 2/3*100
 
   #fitting parameters

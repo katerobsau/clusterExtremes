@@ -5,8 +5,9 @@
 \title{Fit smith max-stable model}
 \usage{
 outer_wrapper_fitmaxstab(fit_info, obs_data, convert = FALSE,
-  frech_bool = TRUE, cov_mod, min_common_obs = 10, min_pairs = 10,
-  sample_bool = FALSE, fit_sample = NULL, ...)
+  frech_bool = TRUE, cov_mod, min_common_obs = 10,
+  min_pairs = choose(10, 2), sample_bool = FALSE, fit_sample = NULL,
+  ...)
 }
 \arguments{
 \item{fit_info}{a data frame which must have columns id, x, y}
@@ -27,7 +28,7 @@ max-stable representation. See SpatialExtremes::fitmaxstab() documentation.}
 \item{min_common_obs}{minimum number of common pairwise observations,
 weight is set to zero in fitting otherwise (default is 10)}
 
-\item{min_pairs}{set a minimum number of pairs needed for fitting (default is 10)}
+\item{min_pairs}{set a minimum number of pairs needed for fitting (default is choose(10,2))}
 
 \item{sample_bool}{repeat fitting for samples of stations (default is FALSE)}
 

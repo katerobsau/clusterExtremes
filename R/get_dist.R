@@ -1,4 +1,5 @@
 #' @export
+#'
 get_dist <- function(x, coords, min_common_years, max_euclid){
 
   print("NEED TO FIX THIS PIECE OF CODE - BAD BAD BAD NAUGHTY BAD")

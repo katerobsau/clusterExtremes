@@ -13,8 +13,8 @@ source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/get_nrm_clusters.
 source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/get_region_from_nrm.R")
 
 map_info <- get_nrm_clusters(cluster_type = nrm_cluster_type, shape_dir = shape_dir)
-region_id = "NA" # c('TAS', "SWWA", "SEA", "EA', "NA", "R")
-region_info <- get_region_from_nrm(region_id, map_info)
+region_name = "TAS"
+region_info <- get_region_from_nrm(region_id=region_name, map_info)
 
 # -----------------------------------------------------------------------------
 
@@ -34,6 +34,7 @@ if(ncol(max_data) != nrow(coords)){
 }
 
 # Get cluster distance
+pitn("Dist file reference!!!")
 clust_dist <- get_dist(x = max_data,
                        coords = coords %>% select(-id),
                        min_common_years = min_common_years,
@@ -47,33 +48,42 @@ coord_plot
 
 # -----------------------------------------------------------------------------
 
-linkage_method = "ward.D2"
-
 # Cluster
+print(paste("Using linkage method", linkage_method))
 source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/1-cluster.R")
 plot(full_tree)
 abline(h = min_cut_height, col ="red", lty = "dashed")
 
-cut_h = 0.32
-abline(h = cut_h, col ="red", lty = "dashed")
-cut_heights = data.frame(h = full_tree$height, k = (nrow(coords)-1):1)
+# -----------------------------------------------------------------------------
+
+# Classify
+source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/2-classify.R")
+
+# Plot the classification
+source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/plot_kknn.R")
+
+# h_values = c(0.12,0.125,0.13,0.135,0.14,0.145,0.15)
+# abline(h = cut_h, col ="red", lty = "dashed")
+# for(cut_h in h_values){
+
+cut_h = 0.12
 
 num_k = cut_heights %>%
   filter(h > cut_h) %>%
   select(k) %>%
   max() + 1
 
-# -----------------------------------------------------------------------------
-
-# Classify
-source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/2-classify.R")
-source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/plot_kknn.R")
-
 classify_plot = plot_kknn(hclusters = hclusters,
                           grid_classify = grid_classify,
-                          num_k = num_k)
-classify_plot
+                          num_k = num_k, show_legend = FALSE) +
+  ggtitle(cut_h)
 
+print(classify_plot)
+
+# file_name = paste("plots/Summary/classify_", region_name, "_cut_h_", cut_h, ".rds",sep="")
+# saveRDS(classify_plot,file =  file_name)
+#
+# }
 # -----------------------------------------------------------------------------
 
 # Subset
@@ -81,6 +91,12 @@ print("SUBSET NOT WORKING CURRENTLY - PRODUCING TOO MANY DISCONNECTED REGIONS")
 # source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/3-subset.R")
 
 # -----------------------------------------------------------------------------
+# for(cut_h in h_values){
+#
+#   num_k = cut_heights %>%
+#     filter(h > cut_h) %>%
+#     select(k) %>%
+#     max() + 1
 
 # Fitting
 source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/4-fitting.R")
@@ -99,9 +115,25 @@ source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/6-repeat_fits.R")
 
 # Ellipse
 source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/7-ellipses.R")
+
+
 source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/plot_ellipses.R")
-# base_plot <- classify_plot
-tas_df <- utils_tasmania()
-base_plot <- ggplot() + geom_path(data = tas_df, aes(x= Long, y = Lat))
-ell_plot = plot_ellipses(base_plot = base_plot, all_ellipses_df, alpha = 0.25)
-ell_plot
+
+  # classify_plot = plot_kknn(hclusters = hclusters,
+  #                           grid_classify = grid_classify,
+  #                           num_k = num_k, show_legend = FALSE) +
+  #   ggtitle(cut_h)
+
+base_plot <- classify_plot
+# base_plot <- ggplot() +
+#   geom_path(data = mainland_df, aes(x= Long, y = Lat)) +
+#   scale_x_continuous(limits = range(coords$x)) +
+#   scale_y_continuous(limits = range(coords$y))
+ell_plot = plot_ellipses(base_plot = base_plot, all_ellipses_df, alpha = 0.25) +
+  ggtitle(num_k)
+print(ell_plot)
+
+# file_name = paste("plots/Summary/ellipses_", region_name, "_cut_h_", cut_h, ".rds", sep="")
+# saveRDS(ell_plot, file =  file_name)
+#
+# }
