@@ -34,7 +34,7 @@ if(ncol(max_data) != nrow(coords)){
 }
 
 # Get cluster distance
-pitn("Dist file reference!!!")
+print("Dist file reference!!!")
 clust_dist <- get_dist(x = max_data,
                        coords = coords %>% select(-id),
                        min_common_years = min_common_years,
