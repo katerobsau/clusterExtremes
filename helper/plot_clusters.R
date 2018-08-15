@@ -1,8 +1,8 @@
 print("HACKED IN CURRENTLY")
-temp_tree = cutree(hclusters, h = 0.135)
+temp_tree = cutree(full_tree, h = 0.12)
 
 # point_info <- data.frame(test_coords, cluster_id = hcluster_list[[18]])
-point_info <- data.frame(test_coords, cluster_id = temp_tree)
+point_info <- data.frame(coords, cluster_id = temp_tree)
 names(point_info)[2:3] = c('x', 'y')
 
 mainland_df <- utils_mainland()
