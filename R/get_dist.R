@@ -2,9 +2,9 @@
 #'
 get_dist <- function(x, coords, min_common_years, max_euclid){
 
-  print("NEED TO FIX THIS PIECE OF CODE - BAD BAD BAD NAUGHTY BAD")
-  source("/Users/saundersk1/Dropbox/Hard Drive/R/2018/ChapterCluster/R/utils_dist.R")
-
+  print("Hard coded function directory in get_dist")
+  source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/utils_dist.R")
+  print("Defined DD_Common twice fix")
   # update fmado distances for clustering
   DD_fmado <- get_fmado_dist(x)
 
