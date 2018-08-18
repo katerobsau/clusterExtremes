@@ -67,15 +67,26 @@ source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/plot_kknn.R")
 # for(cut_h in h_values){
 
 cut_h = 0.12
-
+use_k == TRUE
 num_k = cut_heights %>%
   filter(h > cut_h) %>%
   select(k) %>%
   max() + 1
 
-classify_plot = plot_kknn(hclusters = hclusters,
-                          grid_classify = grid_classify,
-                          num_k = num_k, show_legend = FALSE) +
+if(use_k == TRUE){
+  cluster_ids <- hclusters %>% filter(k == num_k) %>% select(-k, -h)
+  grid_plot <- grid_classify %>% filter(k == num_k)
+  plot_coords = cbind(coords, cluster_id = cluster_ids)
+}else{
+  cluster_ids <- hclusters %>% filter(h == cut_h) %>% select(-k, -h)
+  grid_plot <- grid_classify %>% filter(h == cut_h)
+  num_k = length(unique(cluster_ids))
+  plot_coords = cbind(coords, cluster_id = cluster_ids)
+}
+
+classify_plot = plot_kknn(plot_coords = plot_coords,
+                          grid_plot = grid_plot,
+                          show_legend = FALSE) +
   ggtitle(cut_h)
 
 print(classify_plot)
