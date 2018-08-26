@@ -18,6 +18,8 @@ point_info <- coords %>%
 
 for(i in 1:num_k){
 
+  print(paste("Cluster", i, "of", num_k))
+
   use_id = all_ids[i]
   fit_info = point_info %>% filter(cluster_id == use_id)
   obs_data = max_data %>% select(fit_info$id)

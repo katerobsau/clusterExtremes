@@ -1,8 +1,3 @@
-print("HACKED THIS IN ALONG WITH dists in R folders")
-source("/Users/saundersk1/Documents/Git/clusterExtremes/R/utils_fitting.R")
-source("/Users/saundersk1/Documents/Git/clusterExtremes/R/utils_aus_outline.R")
-print("Warning got two count functions!!!")
-
 # Initialise necessary parameters
 source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/0-initialise.R")
 
@@ -13,8 +8,11 @@ source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/get_nrm_clusters.
 source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/get_region_from_nrm.R")
 
 map_info <- get_nrm_clusters(cluster_type = nrm_cluster_type, shape_dir = shape_dir)
-region_name = "TAS"
-region_info <- get_region_from_nrm(region_id=region_name, map_info)
+region_names = c("TAS", "EA", "SEA", "SWWA", "NA", "R")
+region_name = "EA"
+for(i in 1:length(region_names)){
+  region_name = region_names[i]
+  region_info <- get_region_from_nrm(region_id = region_name, map_info)
 
 # -----------------------------------------------------------------------------
 
@@ -39,62 +37,64 @@ clust_dist <- get_dist(x = max_data,
                        coords = coords %>% select(-id),
                        min_common_years = min_common_years,
                        max_euclid = max_euclid)
-# Plot points
-coord_plot <- ggplot() +
-  geom_path(data = region_info, aes(x=long, y=lat)) +
-  geom_point(data = coords, aes(x=x, y=y))
 
-coord_plot
+#------------------------------------------------------------------------------
+
+# # Plot points
+# coord_plot <- ggplot() +
+#   geom_path(data = region_info, aes(x=long, y=lat)) +
+#   geom_point(data = coords, aes(x=x, y=y))
+#
+# coord_plot
 
 # -----------------------------------------------------------------------------
 
-# Cluster
+# Get cluster summary
 print(paste("Using linkage method", linkage_method))
 source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/1-cluster.R")
-plot(full_tree)
-abline(h = min_cut_height, col ="red", lty = "dashed")
+
+# -----------------------------------------------------------------------------
+
+# # Plot dendrogram
+#
+# source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/plot_dendrogram.R")
+# # plot(full_tree)
+# # abline(h = min_cut_height, col ="red", lty = "dashed")
+# dendro_plot <-
+#   plot_upper_tree(full_tree, region_name, c(min_cut_height, 1/6), cut_h)
+# dendro_plot
 
 # -----------------------------------------------------------------------------
 
 # Classify
+print("HARD CODE: MANUALLY CHANGED GRID SPACE")
+if(region_name %in% c("EA", "SEA", "NA", "R")){
+  grid_space = 0.1
+}else{
+  grid_space = 0.05
+}
+
 source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/2-classify.R")
+
+saveRDS(grid_classify, file = paste("Data/classify_", region_name, ".rds", sep = ""))
+saveRDS(hclusters, file = paste("Data/cluster_", region_name, ".rds", sep = ""))
+
+}
+
+# -----------------------------------------------------------------------------
+
+# Set the cut height
+orig_hclusters = hclusters
+cut_near_h = 0.116 #0.133
+cut_i = which.min(abs(hclusters$h - cut_near_h))
+cut_h = hclusters$h[cut_i]
+
+# -----------------------------------------------------------------------------
 
 # Plot the classification
 source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/plot_kknn.R")
+# print(classify_plot)
 
-# h_values = c(0.12,0.125,0.13,0.135,0.14,0.145,0.15)
-# abline(h = cut_h, col ="red", lty = "dashed")
-# for(cut_h in h_values){
-
-cut_h = 0.12
-use_k == TRUE
-num_k = cut_heights %>%
-  filter(h > cut_h) %>%
-  select(k) %>%
-  max() + 1
-
-if(use_k == TRUE){
-  cluster_ids <- hclusters %>% filter(k == num_k) %>% select(-k, -h)
-  grid_plot <- grid_classify %>% filter(k == num_k)
-  plot_coords = cbind(coords, cluster_id = cluster_ids)
-}else{
-  cluster_ids <- hclusters %>% filter(h == cut_h) %>% select(-k, -h)
-  grid_plot <- grid_classify %>% filter(h == cut_h)
-  num_k = length(unique(cluster_ids))
-  plot_coords = cbind(coords, cluster_id = cluster_ids)
-}
-
-classify_plot = plot_kknn(plot_coords = plot_coords,
-                          grid_plot = grid_plot,
-                          show_legend = FALSE) +
-  ggtitle(cut_h)
-
-print(classify_plot)
-
-# file_name = paste("plots/Summary/classify_", region_name, "_cut_h_", cut_h, ".rds",sep="")
-# saveRDS(classify_plot,file =  file_name)
-#
-# }
 # -----------------------------------------------------------------------------
 
 # Subset
@@ -102,12 +102,6 @@ print("SUBSET NOT WORKING CURRENTLY - PRODUCING TOO MANY DISCONNECTED REGIONS")
 # source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/3-subset.R")
 
 # -----------------------------------------------------------------------------
-# for(cut_h in h_values){
-#
-#   num_k = cut_heights %>%
-#     filter(h > cut_h) %>%
-#     select(k) %>%
-#     max() + 1
 
 # Fitting
 source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/4-fitting.R")
@@ -130,21 +124,33 @@ source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/7-ellipses.R")
 
 source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/plot_ellipses.R")
 
-  # classify_plot = plot_kknn(hclusters = hclusters,
-  #                           grid_classify = grid_classify,
-  #                           num_k = num_k, show_legend = FALSE) +
-  #   ggtitle(cut_h)
+print("Overright error with plot_kknn.R")
+source("/Users/saundersk1/Documents/Git/clusterExtremes/helper/plot_kknn.R")
 
 base_plot <- classify_plot
-# base_plot <- ggplot() +
-#   geom_path(data = mainland_df, aes(x= Long, y = Lat)) +
-#   scale_x_continuous(limits = range(coords$x)) +
-#   scale_y_continuous(limits = range(coords$y))
-ell_plot = plot_ellipses(base_plot = base_plot, all_ellipses_df, alpha = 0.25) +
+ell_plot = plot_ellipses(base_plot = base_plot, all_ellipses_df, alpha = 0.3) +
   ggtitle(num_k)
+
 print(ell_plot)
 
+# -----------------------------------------------------------------------------
+
+### SAVING OUT PLOTS
 # file_name = paste("plots/Summary/ellipses_", region_name, "_cut_h_", cut_h, ".rds", sep="")
 # saveRDS(ell_plot, file =  file_name)
 #
 # }
+
+# plot_dim <- data.frame(region = c("TAS", "SWWA", "EA", "SEA","NA","R"),
+#                        width = c(5,5,10,10,10,10), height = c(4,4,8,8,8,8))
+#
+# thesis_dir = "/Users/saundersk1/Dropbox/Hard Drive/Thesis/"
+# chap_dir = "chapters/06_cluster/sections/img/"
+# plot_dir = paste(thesis_dir, chap_dir, sep = "")
+# file_name = paste(plot_dir, "classify_", region_name, ".pdf",sep="")
+# pdf(file =  file_name,
+#     width = plot_dim %>% filter(region == region_name) %>% select(width) %>% as.numeric(),
+#     height = plot_dim %>% filter(region == region_name) %>% select(height) %>% as.numeric())
+#   print(classify_plot)
+# dev.off()
+#

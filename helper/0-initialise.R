@@ -27,15 +27,15 @@ max_euclid = 1
 
 # Cluster step
 cluster_method = "Hierarchical"
-linkage_method = "mcquitty"
+linkage_method = "average"
 min_cut_height = 0.1
-
+min_cluster_size = 5
 ### ---------------------------------------------------------------------------
 
 # Classify step
 #  # grid specifics
 grid_space = 0.05
-min_dist = 0.3
+min_dist = 0.5
   # number of neighbours
 knn_value = 15
 
@@ -59,6 +59,8 @@ sample_type = "random"
 num_samples = 25
 samp_size = 30
 # percentage = 2/3*100
+# num_samples = 10
+# sample_type = "percentage"
 
   #fitting parameters
 convert = TRUE
@@ -77,3 +79,10 @@ ratio_threshold = 0.1
 ellipse_alpha = 0.1
 
 ### ---------------------------------------------------------------------------
+
+print("HACKED THIS IN ALONG WITH dists in R folders")
+source("/Users/saundersk1/Documents/Git/clusterExtremes/R/utils_fitting.R")
+source("/Users/saundersk1/Documents/Git/clusterExtremes/R/utils_aus_outline.R")
+print("Warning got two count functions!!!")
+
+# -----------------------------------------------------------------------------

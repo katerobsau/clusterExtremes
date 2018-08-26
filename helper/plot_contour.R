@@ -12,7 +12,8 @@ plot_grid_polygons <- function(grid_input){
   sp::coordinates(grd) <- ~ xc + yc
   sp::gridded(grd) <- TRUE
   grd <- as(grd, "SpatialGridDataFrame")
-  plys <- inlmisc::Grid2Polygons(grd, level = TRUE, at = at)
+  at <- 1:ceiling(max(z, na.rm = TRUE))
+  plys <- inlmisc::Grid2Polygons(grd, level = FALSE, at = at)
 
   # get the classes from the map data
   map <- plys

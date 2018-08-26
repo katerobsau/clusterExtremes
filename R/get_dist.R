@@ -37,5 +37,12 @@ get_dist <- function(x, coords, min_common_years, max_euclid){
                                            DD_fmado = DD_fmado_infill,
                                            max_euclid = max_euclid)
 
+  hex_plot <- ggplot() +
+    geom_hex(data = NULL, aes(x=DD_euclid %>% as.numeric(),
+                              y=DD_fmado_all %>% as.numeric())) +
+    scale_y_continuous(limits = c(0, 1/6)) +
+    scale_fill_distiller(palette = "Spectral")
+  print(hex_plot)
+
   return(DD_fmado_all)
 }
