@@ -4,8 +4,8 @@
 \alias{get_grid_for_classification}
 \title{Generate a grid}
 \usage{
-get_grid_for_classification(coords, grid_space = 1, min_dist = 1.5 *
-  grid_space, restrict_aus = TRUE)
+get_grid_for_classification(coords, grid_space = 1, min_dist,
+  poly_df = NULL)
 }
 \arguments{
 \item{coords}{a data frame of coordinates with columns labelled x and y}
@@ -16,8 +16,8 @@ get_grid_for_classification(coords, grid_space = 1, min_dist = 1.5 *
 \item{min_dist}{we restrict the grid to only cover the provided coordinates
 any grid point greater than the min_dist away is removed (default is 1.5*grid_space)}
 
-\item{restrict_aus}{check if the coords fall within australia to
-reduce computational time (default = TRUE)}
+\item{poly_df}{check if the coords fall within a polygon,
+input is a data frame with columns x and y (default =  NULL)}
 }
 \value{
 returns a data frame of gridded coordinates with columns labelled x and y
@@ -30,14 +30,14 @@ Function generates a grid to cover a set of given coordiantes
 set.seed(1)
 n.site <- 30
 coords <-data.frame(x = runif(n.site, 0, 10), y = runif(n.site, 0, 10))
-grid_output = get_grid_for_classification(coords = coords, restrict_aus = FALSE)
+grid_output = get_grid_for_classification(coords = coords)
 plot(grid_output)
 points(coords, col = "red", pch = 20)
 
-n.site <- 100
-coords <-data.frame(x = runif(n.site, 145, 155), y = runif(n.site, -25, -15))
-grid_output = get_grid_for_classification(coords = coords, grid_space = 0.5)
-oz(xlim = c(145,155), ylim = c(-25,-15))
-points(grid_output)
+poly_df <- data.frame(x = c(1,5,6,2,1), y = c(1,2,8,7,1))
+grid_restricted = get_grid_for_classification(coords = coords, poly_df = poly_df)
+plot(grid_output, pch = 3)
+points(grid_restricted, col = "blue", pch = 3)
 points(coords, col = "red", pch = 20)
+
 }

@@ -41,7 +41,7 @@ source("/Users/saundersk1/Documents/Git/clusterExtremes/R/utils_aus_outline.R")
 wa_id = 2; #wa_k = 7
 ea_id = 3; #ea_k = 40
 tas_id = 4; #tas_k = 6
-region_id = wa_id
+region_id = tas_id
 working_dir = "/Users/saundersk1/Dropbox/Hard Drive/R/2018/ChapterCluster/"
 
 # data read
@@ -94,9 +94,9 @@ print("This interpolation definitiely needs review")
 
 # --------------------------------------------------------
 
-cluster_method = "Kmedoids" #"Hierarchical"
+cluster_method = "Hierarchical"
 linkage_method = "average"
-k = 7
+k = 11
 
 if(cluster_method == "Kmedoids"){
   fmado_clusters = pam(DD_fmado_all, k = k, diss = TRUE, medoids = NULL)
@@ -236,8 +236,6 @@ knn_plot
 
 ### ---------------------------------------------------------------------------
 
-if(cluster_method == "Kmedoids"){
-
 ### Fit smith models
 frech_data = apply(test_max, 2, gev2frech_with_tryCatch)
 data = frech_data
@@ -253,38 +251,56 @@ grid = knn_grid %>%
   mutate(y = latitude) %>%
   mutate(knn_id = knn)
 
-print("Warning: Hard coded inputs for fitting")
-medoid_indexes = fmado_clusters$medoids
-len = length(medoid_indexes)
+if(cluster_method == "Kmedoids"){
+  print("Warning: Hard coded inputs for fitting")
+  medoid_indexes = fmado_clusters$medoids
+  len = length(medoid_indexes)
+}else{
+  len = length(unique(knn_info$knn_id))
+}
+
 all_models <- vector("list", len)
 all_ellipses = NULL
-samp_size = 20
+# samp_size = 20
 for(i in 1:len){
   print(i)
-  use_id = i
-  # samp_size = floor(max(sum(knn_info$knn == use_id)*2/3, 10))
+  use_id = unique(knn_info$knn_id)[i]
+  samp_size = floor(max(sum(knn_info$knn == use_id)*2/3, 10))
+  if(cluster_method == "Kmedoids"){
   model_list <- tryCatch({fit_smith_model(data = data, knn_info = knn_info,
                                           medoid_indexes = medoid_indexes, use_id = i,
                                           grid, min_class_prob = 0.5, high_class_prob = 0.75,
-                                          num_samps = 30, samp_size = samp_size,
+                                          num_samps = 10, samp_size = samp_size,
                                           min_common_obs = 10, min_pairs = choose(10,2),
                                           ratio_threshold = 0.1, ellipse_alpha = 0.1,
                                           max_iter = 3,
                                           save_output = FALSE, output_dir = NULL,
                                           reference_id = NULL)},
                          error = function(e){return(NULL)})
+  }
+
+  if(cluster_method == "Hierarchical"){
+    model_list <- tryCatch({fit_smith_model_hclust(data = data, knn_info = knn_info,
+                                            medoid_indexes = NULL, use_id = i,
+                                            grid, min_class_prob = 0.5, high_class_prob = 0.75,
+                                            num_samps = 10, samp_size = samp_size,
+                                            min_common_obs = 10, min_pairs = choose(10,2),
+                                            ratio_threshold = 0.1, ellipse_alpha = 0.1,
+                                            max_iter = 3,
+                                            save_output = FALSE, output_dir = NULL,
+                                            reference_id = NULL)},
+                           error = function(e){return(NULL)})
+  }
 
   if(is.null(model_list)) next
 
   all_models[[i]] = model_list
 
   ellipse_df <- get_ellipse_from_smith_model_list(model_list,
-                                                  medoid = knn_info[medoid_indexes[use_id], ]) %>%
+                   medoid = knn_info[medoid_indexes[use_id], ]) %>%
     mutate(region_id = use_id)
 
   all_ellipses = rbind(all_ellipses, ellipse_df)
-}
-
 }
 
 ### ---------------------------------------------------------------------------

@@ -5,8 +5,8 @@
 \title{Converts GEV distrubted data to unit Frechet data
 All functions are wrapped to handle any errors}
 \usage{
-get_ellipse_from_smith_model_list(model_list, medoid = data.frame(x = 0, y =
-  0))
+get_ellipse_from_smith_model_list(model_list, medoid = data.frame(x = 0,
+  y = 0))
 }
 \arguments{
 \item{model_list}{list of smith max-stable model fits}
@@ -26,10 +26,10 @@ All functions are wrapped to handle any errors
 n.site <- 30
 locations <- matrix(runif(2*n.site, 0, 10), ncol = 2)
 colnames(locations) <- c("lon", "lat")
-data1 <- rmaxstab(40, locations, cov.mod = "gauss", cov11 = 1, cov12 = 0, cov22 = 1)
+data1 <- rmaxstab(100, locations, cov.mod = "gauss", cov11 = 1, cov12 = 0, cov22 = 1)
 fit1 <- fitmaxstab(data1, locations, "gauss", loc.form <- loc ~ 1, scale.form <- scale ~ 1,
 shape.form <- shape ~ 1,)
-data2 <- rmaxstab(40, locations, cov.mod = "gauss", cov11 = 0.5, cov12 = 0, cov22 = 0.5)
+data2 <- rmaxstab(100, locations, cov.mod = "gauss", cov11 = 0.5, cov12 = 0, cov22 = 0.5)
 fit2 <- fitmaxstab(data2, locations, "gauss", loc.form <- loc ~ 1, scale.form <- scale ~ 1,
 shape.form <- shape ~ 1,)
 model_list = list(fit1, fit2)

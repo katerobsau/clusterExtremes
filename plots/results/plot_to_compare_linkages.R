@@ -9,9 +9,9 @@ source("/Users/saundersk1/Documents/Git/clusterExtremes/R/utils_aus_outline.R")
 ### Get region coords and data
 
 # inputs needed
-ea_id = 3; #wa_k = 7
+tas_id = 4; #wa_k = 7
 print("Warning: May need to update region_id if we update the clustering in the working directory!!!")
-region_id = ea_id
+region_id = tas_id
 working_dir = "/Users/saundersk1/Dropbox/Hard Drive/R/2018/ChapterCluster/"
 
 # data read
@@ -19,8 +19,8 @@ fmado_data = readRDS(paste(working_dir, "Data/fmado_data.rds", sep = ""))
 region_coords = readRDS(paste(working_dir, "Data/region_coords.rds", sep = ""))
 
 # data processing
-test_coords = do.call(rbind, region_coords) %>%
-  filter(latitude > -35 & latitude < -25 & longitude > 145)
+test_coords = region_coords[[region_id]] #do.call(rbind, region_coords) %>%
+  # filter(latitude > -35 & latitude < -25 & longitude > 145)
 test_max = select(fmado_data, test_coords$id)
 dim(test_max); dim(test_coords)
 
@@ -67,13 +67,16 @@ print("This interpolation definitiely needs review")
 
 ## Clustering
 cluster_method = "Hierarchical"
-linkage_method = c("ward.D", "ward.D2", "single", "complete",  "average", "mcquitty", "median", "centroid")
+linkage_method = c("ward.D", "ward.D2", "single", "complete",  "average",
+                   "mcquitty", "median", "centroid")
 k = 10
 len = length(linkage_method)
 hcluster_list = vector("list", len)
+dendro_list = vector("list", len)
 for(i in 1:len){
   hclusters = hclust(DD_fmado_all, method = linkage_method[i])
-  hcluster_list[[i]] = cutree(hclusters, k = k)
+  dendro_list[[i]] = hclusters
+  hcluster_list[[i]] = cutree(hclusters, k = 10)
 }
 
 # --------------------------------------------------------
@@ -99,7 +102,7 @@ hcluster_plot <- ggplot() +
              aes(x = longitude, y = latitude,
                  col = as.factor(cluster_id),
                  shape = as.factor(cluster_id%%6),
-                 group = linkage)) +
+                 group = linkage), size = 0.2) +
   # geom_point(data = medoid_coords, aes(x = longitude, y = latitude,
   #                                      group = distance_type)) +
   coord_fixed() +
@@ -120,3 +123,22 @@ hcluster_plot <- ggplot() +
         axis.title = text.type.large)
 
 hcluster_plot
+
+# # --------------------------------------------------------
+# thesis_dir = "/Users/saundersk1/Dropbox/Hard Drive/Thesis/"
+# chap_dir = "chapters/06_cluster/sections/img/"
+# plot_dir = paste(thesis_dir, chap_dir, sep = "")
+# for(i in 1:len){
+#   pdf(file = paste(plot_dir, "linkage_", linkage_method[i], ".pdf", sep = ""),
+#       width = 5, height = 3)
+#     print(ggdendrogram(dendro_list[[i]], labels = FALSE) +
+#           ggtitle(paste("Dendrogram for linkage", linkage_method[i])) +
+#           theme(legend.position = "none",
+#                 legend.text = text.type.small,
+#                 strip.text.x = text.type.large,
+#                 axis.text = text.type.small,
+#                 plot.title = text.type.large,
+#                 axis.title = text.type.large))
+#   dev.off()
+# }
+

@@ -4,10 +4,11 @@
 \alias{fit_smith_model}
 \title{Fit smith max-stable model to bootstrap samples}
 \usage{
-fit_smith_model(data, knn_info, medoid_indexes, use_id, grid, min_class_prob,
-  high_class_prob, frech_bool = TRUE, num_samps, samp_size, min_common_obs,
-  min_pairs = choose(10, 2), ratio_threshold = 0.1, ellipse_alpha, max_iter,
-  save_output = FALSE, output_dir = NULL, reference_id = NULL)
+fit_smith_model(data, knn_info, medoid_indexes, use_id, grid,
+  min_class_prob, high_class_prob, frech_bool = TRUE, num_samps,
+  samp_size, min_common_obs, min_pairs = choose(10, 2),
+  ratio_threshold = 0.1, ellipse_alpha, max_iter, save_output = FALSE,
+  output_dir = NULL, reference_id = NULL)
 }
 \arguments{
 \item{data}{a data frame with columns labelled by the station id, and

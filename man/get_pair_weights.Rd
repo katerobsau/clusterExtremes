@@ -7,7 +7,7 @@
 get_pair_weights(data, min_common_obs = 10)
 }
 \arguments{
-\item{data}{data frame with observations}
+\item{data}{data frame with rows of observations, and columns of points.}
 
 \item{min_common_obs}{minimum number of shared observations, default is 10}
 }
@@ -15,10 +15,12 @@ get_pair_weights(data, min_common_obs = 10)
 Returns a vector of pair weights for input into composite likelihood
 }
 \description{
-Data is matrix, where the rows index the observations and columns index
-the points. We return a vector of weights, for pairs when column index
-i < j. This is useful for fitting statistical models using
+When fitting statistical models such as
 composite likelihood, as pairs must have overlapping observations.
+This function takes a data, where the rows index the observations and
+columns index the points. We return a vector of weights,
+for pairs (i,j), where column index i < j and there is minimum
+number of common observations.
 }
 \details{
 Here we set a minimum number of overlapping observations before we
